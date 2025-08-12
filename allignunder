@@ -1,0 +1,847 @@
+<!-- Softr HTML Block (3-line clamp + clean links + utilities pills + preferred order) -->
+<div class="container">
+  <div class="outer-card">
+    <div class="page-title">Basic building information</div>
+    <div class="subtitle">Essential building information available at no charge. This includes fees, policies, and application documents.</div>
+
+    <div class="info-card">
+      <div class="card-title">💵 Basic building information</div>
+      <div class="card-subtitle">Essential building information available at no charge</div>
+    </div>
+
+    <!-- Section: Fees -->
+    <div class="section">
+      <button class="section-head" type="button" data-target="#fees-section">
+        <div class="head-left"><span class="head-icon">$</span><div><div class="head-title">Building Fees</div><div class="head-caption">Move in/out fees, deposits, application fees</div></div></div>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="fees-section">Loading fees...</div>
+    </div>
+
+    <!-- Section: Fee Policies -->
+    <div class="section">
+      <button class="section-head" type="button" data-target="#fee-policies-section">
+        <div class="head-left"><span class="head-icon">📄</span><div><div class="head-title">Building Fee Policies</div><div class="head-caption">Flip tax, sublet fee, capital contribution</div></div></div>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="fee-policies-section">Loading fee policies...</div>
+    </div>
+
+    <!-- Section: Building Policies -->
+    <div class="section">
+      <button class="section-head" type="button" data-target="#building-policies-section">
+        <div class="head-left"><span class="head-icon">🏛️</span><div><div class="head-title">Building Policies</div><div class="head-caption">House rules, leasing, ownership allowances</div></div></div>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="building-policies-section">Loading policies...</div>
+    </div>
+
+    <div class="section" style="display:none">
+      <button class="section-head" type="button" data-target="#documents-section">
+        <div class="head-left"><span class="head-icon">📎</span><div><div class="head-title">Application Documents</div><div class="head-caption">Files and policies</div></div></div>
+        <span class="chevron">▼</span>
+      </button>
+      <div class="section-body" id="documents-section">Loading documents...</div>
+    </div>
+  </div>
+  
+  <!-- Print button at the very bottom -->
+  <div class="print-controls">
+    <button class="print-btn" onclick="window.print()">
+      🖨️ Print Full Report
+    </button>
+  </div>
+</div>
+
+<style>
+  :root{ 
+    --border:#e5e7eb; 
+    --bg:#f8fafc; 
+    --fg:#1f2937; 
+    --muted:#6b7280; 
+    --brand:#006956; 
+    --row-bg:#ffffff; 
+    
+    /* Daisy Brand Colors - used sparingly as accents */
+    --daisy-deep:#08494B;
+    --daisy-green:#006956;
+    --daisy-grass:#4C9D8D;
+    --daisy-mint:#D3FFF3;
+    --daisy-off:#FFFDF4;
+  }
+  body{ background:var(--bg); }
+  .container{ max-width:960px; margin:auto; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; padding:40px 20px; color:var(--fg);} 
+  .outer-card{ background:#fff; border:1px solid var(--border); padding:28px; box-shadow:0 4px 10px rgba(0,0,0,.04); border-radius:4px;}
+  .page-title{ font-size:28px; font-weight:800; text-align:center; margin:6px 0; color:var(--fg);}
+  .subtitle{ text-align:center; color:var(--muted); font-size:14px; margin-bottom:22px;}
+  
+  /* Rate limit message styling */
+  .rate-limit-message {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  
+  .rate-limit-message .message-content {
+    color: #92400e;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  
+  .rate-limit-message span {
+    font-size: 16px;
+  }
+
+  /* Info card - subtle Daisy accent */
+  .info-card{
+    background:linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border:1px solid var(--daisy-green);
+    border-radius:4px; padding:16px 18px; margin-bottom:20px; color:var(--fg);
+  }
+  .card-title{ font-weight:700; font-size:16px; color:var(--daisy-deep); }
+  .card-subtitle{ font-size:13px; color:var(--muted); margin-top:2px; }
+  .info-card::after{
+    content:""; display:block; height:3px; margin-top:10px; border-radius:1px;
+    background:linear-gradient(90deg, var(--daisy-green), var(--daisy-grass));
+  }
+
+  .section{ border:1px solid var(--border); border-radius:4px; margin:16px 0; overflow:hidden; background:#fff;}
+  .section + .section{ margin-top:18px; }
+  .section-head{ width:100%; display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border:0; padding:14px 16px; cursor:pointer; font:inherit; text-align:left; color:var(--fg); }
+  .section-head:hover{ background:#f1f5f9; }
+  .head-left{ display:flex; gap:12px; align-items:center;}
+  .head-icon{ width:28px; height:28px; display:inline-grid; place-items:center; background:var(--daisy-green); color:#fff; border-radius:4px; font-weight:400; }
+  .head-title{ font-weight:400; font-size:16px; }
+  .head-caption{ font-size:12px; color:var(--muted); margin-top:2px; letter-spacing:0.05em; }
+  .chevron{ transition:transform .25s ease; color:var(--muted); }
+  .section.open .chevron{ transform:rotate(-180deg); }
+
+  .section-body{ display:none; padding:14px; background:#fff; }
+  .section.open .section-body{ display:block; }
+
+  .section-body h4{ font-size:12px; letter-spacing:.05em; color:var(--muted); margin:14px 4px 8px; font-weight:400; }
+
+  .data-row{ display:flex; flex-direction:column; gap:8px; padding:14px 16px; background:var(--row-bg); border:1px solid var(--border); border-radius:4px; margin:8px 0; }
+  .label{ font-weight:400; color:var(--muted); font-size:12px; letter-spacing:0.05em; }
+  .value{ font-weight:400; color:var(--fg); text-align:left; white-space:normal; word-break:break-word; display:flex; flex-direction:column; align-items:flex-start; gap:6px; width:100%; }
+  .value a{ color:var(--daisy-green); text-decoration:underline; }
+  .data-row:hover{ background:#f8fafc; }
+  
+  /* Special styling for utilities and HVAC containers */
+  .data-row.utility-hvac-row {
+    background: var(--daisy-mint);
+    border: 1px solid var(--daisy-grass);
+    border-radius: 4px;
+  }
+  
+  .data-row.utility-hvac-row:hover {
+    background: var(--daisy-off);
+  }
+  
+  .data-row.utility-hvac-row .label {
+    color: var(--daisy-deep);
+  }
+  
+  .data-row.utility-hvac-row .value {
+    color: var(--daisy-deep);
+  }
+
+  /* 3-line clamp UI */
+  .clamp-wrap{ max-width:100%; }
+  .clamp-text{ 
+    display:-webkit-box; 
+    -webkit-line-clamp:3; 
+    -webkit-box-orient:vertical; 
+    overflow:hidden; 
+    transition:all 0.3s ease;
+    /* Fallback for browsers that don't support line-clamp */
+    max-height: 4.5em;
+    line-height: 1.5em;
+  }
+  .clamp-wrap[data-expanded="true"] .clamp-text{ 
+    display:block; 
+    -webkit-line-clamp:unset; 
+    max-height: none;
+  }
+  .toggle{ margin-top:8px; padding:6px 12px; border:1px solid var(--daisy-green); background:var(--daisy-green); color:#fff; font:inherit; font-weight:600; text-decoration:none; cursor:pointer; border-radius:4px; font-size:12px; transition:all 0.2s ease; }
+  .toggle:hover{ background:var(--daisy-deep); border-color:var(--daisy-deep); }
+  
+  /* Hide toggle by default, show only when needed */
+  .toggle{ display:none; }
+  .clamp-wrap[data-overflow="true"] .toggle{ display:inline-block !important; }
+  
+  /* Subtle visual feedback for expanded text - just a green left border line */
+  .clamp-wrap[data-expanded="true"] .clamp-text {
+    /* Removed green border line */
+    padding-left: 0;
+    margin-left: 0;
+    transition: all 0.3s ease;
+  }
+
+  /* Policy links stack – tidy & aligned */
+  .stack-links{ display:flex; flex-direction:column; gap:6px; align-items:flex-end; justify-content:center; }
+  .stack-links a{ display:inline-flex; align-items:center; justify-content:center; padding:6px 10px; border-radius:4px; background:#f8fafc; border:1px solid var(--border); color:var(--fg); font-weight:700; text-decoration:none; }
+  .stack-links a:hover{ background:var(--daisy-green); color:#fff; }
+
+  /* CHIP/TAG boxes – used ONLY for Utilities/HVAC */
+  .pills{ display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
+  .pill{ display:inline-flex; align-items:center; padding:4px 8px; border-radius:4px; font-size:12px; line-height:1; font-weight:700; border:1px solid var(--daisy-grass); background:var(--daisy-off); color:var(--daisy-deep); }
+  .pill:nth-child(7n+1){ background:#e8f5e8; border-color:#9be6a3; color:#166534; }
+  .pill:nth-child(7n+2){ background:#f0f9ff; border-color:#7dd3fc; color:#0369a1; }
+  .pill:nth-child(7n+3){ background:#fef3c7; border-color:#fcd34d; color:#92400e; }
+  .pill:nth-child(7n+4){ background:#fce7f3; border-color:#f9a8d4; color:#be185d; }
+  .pill:nth-child(7n+5){ background:#f3e8ff; border-color:#c4b5fd; color:#7c3aed; }
+  .pill:nth-child(7n+6){ background:#ecfdf5; border-color:#86efac; color:#166534; }
+  .pill:nth-child(7n+7){ background:#fff7ed; border-color:#fed7aa; color:#ea580c; }
+  
+  /* Print Button */
+  .print-controls {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 40px;
+    padding-bottom: 40px;
+  }
+  
+  .print-btn {
+    background: var(--daisy-green);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .print-btn:hover {
+    background: var(--daisy-deep);
+  }
+  
+  /* Print Styles */
+  @media print {
+    /* Hide print button and controls */
+    .print-controls,
+    .section-head,
+    .toggle {
+      display: none !important;
+    }
+    
+    /* Show all section content */
+    .section-body {
+      display: block !important;
+    }
+    
+    /* Completely hide ALL toggle buttons in print */
+    .toggle,
+    button.toggle,
+    .clamp-wrap .toggle,
+    [class*="toggle"] {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      position: absolute !important;
+      left: -9999px !important;
+    }
+    
+    /* Expand all clamped text and remove clamping */
+    .clamp-wrap[data-expanded="false"] .clamp-text,
+    .clamp-wrap .clamp-text {
+      display: block !important;
+      -webkit-line-clamp: unset !important;
+      max-height: none !important;
+      overflow: visible !important;
+      height: auto !important;
+      -webkit-box-orient: unset !important;
+    }
+    
+    /* Remove all clamping restrictions for print */
+    .clamp-text {
+      display: block !important;
+      -webkit-line-clamp: unset !important;
+      max-height: none !important;
+      overflow: visible !important;
+      -webkit-box-orient: unset !important;
+      height: auto !important;
+    }
+    
+    /* Remove visual feedback styling for print */
+    .clamp-wrap[data-expanded="true"] .clamp-text,
+    .clamp-wrap .clamp-text {
+      background: transparent !important;
+      padding: 0 !important;
+      border-left: none !important;
+      border: none !important;
+    }
+    
+    /* Remove shadows and borders for cleaner print */
+    .outer-card {
+      box-shadow: none !important;
+      border: 1px solid #ccc !important;
+    }
+    
+    /* Ensure good contrast for printing */
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .outer-card {
+      background: white !important;
+    }
+    
+    .section {
+      border: 1px solid #ccc !important;
+      background: white !important;
+      margin: 10px 0 !important;
+      page-break-inside: avoid;
+    }
+    
+    .section-head {
+      background: #f5f5f5 !important;
+      color: black !important;
+    }
+    
+    .data-row {
+      border: 1px solid #ddd !important;
+      background: white !important;
+      page-break-inside: avoid;
+    }
+    
+    /* Add page breaks where appropriate */
+    .section:not(:last-child) {
+      page-break-after: auto;
+    }
+    
+    /* Ensure headers don't break across pages */
+    .page-title,
+    .subtitle,
+    .section-head {
+      page-break-after: avoid;
+    }
+  }
+</style>
+
+<script>
+(()=>{ 'use strict';
+
+(function attachWhenSoftrReady(){
+  const run = () => requestAnimationFrame(init);
+  document.addEventListener('spr:rendered', run, { once:true });
+  document.addEventListener('DOMContentLoaded', run, { once:true });
+  setTimeout(()=>{ if(!window.__blkReady) run(); }, 300);
+})();
+
+function init(){
+  if(window.__blkReady) return;
+  const root = document.querySelector('.outer-card');
+  if(!root){ requestAnimationFrame(init); return; }
+  window.__blkReady = true;
+
+  document.querySelectorAll('.section-head').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const section = btn.closest('.section');
+      const open = section.classList.contains('open');
+      // Toggle the clicked section only, don't close others
+      if(open) {
+        section.classList.remove('open');
+      } else {
+        section.classList.add('open');
+      }
+    });
+  });
+  document.querySelector('.section')?.classList.add('open');
+
+  // Toggle for 3-line clamp
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.toggle');
+    if(!btn) return;
+    const wrap = btn.closest('.clamp-wrap');
+    const expanded = wrap.getAttribute('data-expanded') === 'true';
+    wrap.setAttribute('data-expanded', String(!expanded));
+    btn.textContent = expanded ? 'Show more' : 'Show less';
+    btn.setAttribute('aria-expanded', String(!expanded));
+  });
+
+  // Print functionality - expand all content
+  window.addEventListener('beforeprint', () => {
+    // Expand all sections
+    document.querySelectorAll('.section').forEach(section => {
+      section.classList.add('open');
+    });
+    
+    // Expand all clamped text
+    document.querySelectorAll('.clamp-wrap').forEach(wrap => {
+      wrap.setAttribute('data-expanded', 'true');
+    });
+    
+    // Force hide all toggle buttons
+    document.querySelectorAll('.toggle').forEach(toggle => {
+      toggle.style.display = 'none';
+      toggle.style.visibility = 'hidden';
+      toggle.style.opacity = '0';
+      toggle.style.position = 'absolute';
+      toggle.style.left = '-9999px';
+    });
+  });
+  
+  // Also handle after print to restore state
+  window.addEventListener('afterprint', () => {
+    // Restore toggle button visibility for screen viewing
+    document.querySelectorAll('.toggle').forEach(toggle => {
+      toggle.style.display = '';
+      toggle.style.visibility = '';
+      toggle.style.opacity = '';
+      toggle.style.position = '';
+      toggle.style.left = '';
+    });
+    
+    // Reset all text back to collapsed state
+    document.querySelectorAll('.clamp-wrap').forEach(wrap => {
+      wrap.setAttribute('data-expanded', 'false');
+    });
+    
+    // Restore original section states (only first section open)
+    document.querySelectorAll('.section').forEach((section, index) => {
+      if (index === 0) {
+        section.classList.add('open');
+      } else {
+        section.classList.remove('open');
+      }
+    });
+  });
+
+  fetchData().catch(console.error);
+}
+
+async function fetchData(){
+  const qs = new URLSearchParams(window.location.search);
+  const buildingId = qs.get('buildingId');
+  if(!buildingId) return;
+
+  const cached = sessionStorage.getItem(buildingId);
+  let data;
+  
+  try {
+    data = cached ? JSON.parse(cached) : await webhook(buildingId);
+  } catch (error) {
+    console.warn('Webhook failed, using fallback data:', error.message);
+    
+    // Check if it's a rate limit error
+    if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
+      showRateLimitMessage();
+    }
+    
+    // Use fallback data when webhook fails
+    data = getFallbackData(buildingId);
+  }
+  
+  const normalized = Array.isArray(data) ? (data[0] || {}) : data;
+  sessionStorage.setItem(buildingId, JSON.stringify(normalized));
+  render(normalized);
+}
+
+// Show user-friendly rate limit message
+function showRateLimitMessage() {
+  const messageEl = document.createElement('div');
+  messageEl.className = 'rate-limit-message';
+  messageEl.innerHTML = `
+    <div class="message-content">
+      <span>⚠️</span> 
+      <strong>Rate Limited:</strong> The data service is temporarily busy. 
+      Showing sample data. Please try again in a few minutes.
+    </div>
+  `;
+  
+  // Insert after the page title
+  const titleEl = document.querySelector('.page-title');
+  if (titleEl && titleEl.parentNode) {
+    titleEl.parentNode.insertBefore(messageEl, titleEl.nextSibling);
+  }
+  
+  // Auto-remove after 10 seconds
+  setTimeout(() => {
+    if (messageEl.parentNode) {
+      messageEl.parentNode.removeChild(messageEl);
+    }
+  }, 10000);
+}
+
+// Fallback data when webhook fails
+function getFallbackData(buildingId) {
+  return {
+    fees: {
+      sales: {
+        'Sale building application fee': '500',
+        'Sale move in fee': '250',
+        'Sale move out fee': '150',
+        'Sale move in deposit': '1000',
+        'Sale move out deposit': '500'
+      },
+      leases: {
+        'Lease building application fee': '75',
+        'Lease move in fee': '200',
+        'Lease move out fee': '100',
+        'Lease move in deposit': '2000'
+      },
+      alterations: {
+        'Alteration sec deposit (%)': '10'
+      }
+    },
+    feePolicies: {
+      'Flip Tax': '2% of sale price',
+      'Sublet Fee': '500',
+      'Capital Contribution': '1000'
+    },
+    buildingPolicies: {
+      'LLCs allowed': 'Yes',
+      'Pied a terre': 'Yes',
+      'Trusts allowed': 'Yes',
+      'Gifting allowed?': 'Yes',
+      'Co-purchasing': 'Yes',
+      'Fee simple': 'Yes',
+      'Right of First Refusal': 'Yes',
+      'Utilities included': 'Water, Sewage, Electric, Gas',
+      'HVAC': 'Central Air, Heat',
+      'Sublet policy?': 'Sublets allowed with board approval and 500 fee',
+      'Pet Policy': 'Dogs and cats allowed with board approval. Maximum 2 pets per unit. Breed restrictions apply. Pet deposit required.'
+    }
+  };
+}
+
+// --- Robustly extract JSON from noisy responses ---
+function extractJsonFromRaw(raw){
+  let txt = raw.replace(/^\)\]\}'\n?/, '').replace(/^[^\[{]*?(?=[\[{])/, '');
+  try { return JSON.parse(txt); } catch {}
+  const openIdx = txt.search(/[\[{]/);
+  if(openIdx === -1) throw new Error('No JSON braces in response');
+  const openCh = txt[openIdx];
+  const closeCh = openCh === '{' ? '}' : ']';
+  let depth = 0, inStr = false, esc = false, endIdx = -1;
+  for(let i=openIdx;i<txt.length;i++){
+    const c = txt[i];
+    if(inStr){ if(esc){ esc=false; continue; } if(c==='\\'){ esc=true; } else if(c==='"'){ inStr=false; } continue; }
+    if(c==='"'){ inStr=true; continue; }
+    if(c===openCh) depth++; else if(c===closeCh){ depth--; if(depth===0){ endIdx=i; break; } }
+  }
+  if(endIdx!==-1){
+    const slice = txt.slice(openIdx, endIdx+1);
+    try { return JSON.parse(slice); } catch {}
+    const repaired = slice.replace(/,\s*(?=[}\]])/g,'');
+    return JSON.parse(repaired);
+  }
+  throw new Error('Could not balance JSON braces');
+}
+
+async function webhook(buildingId){
+  try {
+    const res = await fetch('https://hook.us1.make.com/uaahksz3fcajpj1eixp9unaxnkkumhr7',{
+      method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json, text/plain, */*' },
+      body:JSON.stringify({ buildingId })
+    });
+    
+    const raw = await res.text();
+    
+    // Handle rate limiting specifically
+    if (res.status === 429) {
+      throw new Error('429 Too Many Requests: Rate limit exceeded. Please try again later.');
+    }
+    
+    if (res.status === 202 || /^\s*Accepted\s*$/i.test(raw)){
+      console.warn('Webhook returned 202 Accepted - this usually means the webhook is configured to accept requests but not return data');
+      throw new Error('Backend returned 202 Accepted without JSON. The webhook needs to be configured to return building data in the response.');
+    }
+    
+    if (!raw.trim()) {
+      throw new Error('Webhook returned empty response');
+    }
+    
+    try { 
+      return extractJsonFromRaw(raw); 
+    } catch(e){
+      console.error('Failed to parse webhook response:', e);
+      console.error('Webhook response (first 400 chars):', raw.slice(0,400));
+      throw new Error(`Webhook returned non-JSON response: ${e.message}`);
+    }
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error: Unable to reach the webhook service');
+    }
+    throw error;
+  }
+}
+
+/* ---------- config ---------- */
+const MAX_DOC_LINKS = Infinity;
+const byId = id => document.getElementById(id);
+const fallback = '-';
+
+/* helpers */
+const meaningful = (v)=>{
+  if (v == null) return false;
+  if (Array.isArray(v)) return v.some(meaningful);
+  if (typeof v === 'object') return Object.values(v).some(meaningful);
+  const s = String(v).trim();
+  if (!s) return false;
+  return !['-','n/a','na','not applicable','none','null','undefined'].includes(s.toLowerCase());
+};
+const val = (obj,key)=>{
+  const raw = obj?.[key];
+  return meaningful(raw) ? (typeof raw === 'number' ? raw : String(raw).trim()) : fallback;
+};
+const dollar = v => meaningful(v) ? `$${v}` : fallback;
+
+// Escape + keep line breaks (safe)
+const ESC_MAP = { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' };
+const esc = s => String(s).replace(/[&<>"']/g, ch => ESC_MAP[ch]);
+const htmlize = s => esc(s).replace(/\n/g,'<br>');
+
+
+const renderRow = (label, valueHtml)=>
+  `<div class="data-row"><span class="label">${label}</span><div class="value">${valueHtml}</div></div>`;
+
+const renderClamped = (text)=> {
+  const content = htmlize(String(text));
+  return `
+    <div class="clamp-wrap" data-expanded="false">
+      <div class="clamp-text">${content}</div>
+      <button class="toggle" type="button" aria-expanded="false">Show more</button>
+    </div>`;
+};
+
+const renderRowIf = (label, raw)=>{
+  if(!meaningful(raw)) return '';
+  const text = Array.isArray(raw) ? raw.map(x=>String(x).trim()).filter(Boolean).join(', ') : String(raw);
+  return renderRow(label, renderClamped(text));
+};
+
+const SPLIT_REGEX = new RegExp('[,;/|•&]+', 'g'); // no literal slashes
+
+const splitTokens = (s) =>
+  String(s)
+    .replace(/\band\b/gi, ',')         // turn "and" into a delimiter
+    .split(SPLIT_REGEX)                // split on , ; / | • &
+    .map(t => t.trim())
+    .filter(Boolean);
+
+const toChipItems = (v) => {
+  if (Array.isArray(v)){
+    return v.flatMap(x => {
+      if (x == null) return [];
+      if (typeof x === 'string') return splitTokens(x);
+      if (typeof x === 'object' && 'name' in x) return [String(x.name).trim()];
+      return [String(x).trim()];
+    });
+  }
+  if (v && typeof v === 'object'){
+    const guess = v.value || v.text || v.name || v.label;
+    if (guess) return splitTokens(guess);
+  }
+  if (typeof v === 'string'){
+    const s = v.trim().replace(/^\[(.*)\]$/,'$1');
+    try {
+      if (s.startsWith('[') && s.endsWith(']'))
+        return JSON.parse(s).map(x=>String(x).trim()).filter(Boolean);
+    } catch {}
+    return splitTokens(s);
+  }
+  return [];
+};
+
+const renderChips = (items)=> items.length ? `<div class="pills">${items.map(t=>`<span class="pill">${t}</span>`).join('')}</div>` : '';
+const isChipField = (label) => /(utilities\s*included|utilities|hvac)/i.test(String(label));
+
+/* JSON extraction for attachments embedded as strings */
+function extractJsonObjects(str){
+  const out=[]; let depth=0, start=-1, inStr=false, esc=false;
+  for(let i=0;i<str.length;i++){
+    const ch=str[i];
+    if(inStr){ if(esc){esc=false; continue;} if(ch==='\\'){esc=true; continue;} if(ch==='"'){inStr=false;}
+      continue;
+    }
+    if(ch==='"'){ inStr=true; continue; }
+    if(ch==='{'){ if(depth===0) start=i; depth++; }
+    else if(ch==='}'){ depth--; if(depth===0 && start!==-1){ out.push(str.slice(start, i+1)); start=-1; } }
+  }
+  return out;
+}
+function normalizeAttachments(field){
+  const out=[];
+  const pushMaybe = att=>{ if(!att||!att.url) return; const url=String(att.url).replace(/\s/g,'%20'); if(!out.some(x=>x.url===url)) out.push({ url, filename: att.filename || 'Policy' }); };
+  const fromString = s=>{
+    const str=s.trim();
+    if(str.startsWith('{') && str.endsWith('}')){ try{ pushMaybe(JSON.parse(str)); return; }catch{} }
+    const blobs=extractJsonObjects(str);
+    if(blobs.length){ blobs.forEach(b=>{ try{ pushMaybe(JSON.parse(b)); }catch{} }); return; }
+    (str.match(/https?:\/\/[^\s"']+/g)||[]).forEach(u=>pushMaybe({url:u, filename:'Policy'}));
+  };
+  const fromEntry = e=>{ if(!e) return; if(Array.isArray(e)) e.forEach(fromEntry); else if(typeof e==='object') pushMaybe(e); else if(typeof e==='string') fromString(e); };
+  fromEntry(field);
+  return out;
+}
+const uniqueByUrl = arr => { const s=new Set(); return arr.filter(a => (a.url && !s.has(a.url)) ? (s.add(a.url), true) : false); };
+
+/* ---------- render ---------- */
+function render(data){
+  const feesEl = byId('fees-section');
+  const feePoliciesEl = byId('fee-policies-section');
+  const buildingPoliciesEl = byId('building-policies-section');
+  const documentsEl = byId('documents-section');
+  if(!feesEl || !feePoliciesEl || !buildingPoliciesEl || !documentsEl) return;
+
+  const fees = data.fees || {};
+  const feePolicies = data.feePolicies || {};
+  const buildingPolicies = data.buildingPolicies || {};
+
+  /* Fees */
+  const salesHtml = [
+    renderRowIf('Application Fee (Sale)', dollar(val(fees.sales||{}, 'Sale building application fee'))),
+    renderRowIf('Move-in Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move in fee'))),
+    renderRowIf('Move-out Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move out fee'))),
+    renderRowIf('Security Deposit (Sale)', dollar(val(fees.sales||{}, 'Sale move in deposit'))),
+    renderRowIf('Board Package Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move out deposit'))),
+  ].join('');
+
+  const leaseHtml = [
+    renderRowIf('Application Fee (Sublet)', dollar(val(fees.leases||{}, 'Lease building application fee'))),
+    renderRowIf('Move-in Fee (Sublet)', dollar(val(fees.leases||{}, 'Lease move in fee'))),
+    renderRowIf('Move-out Fee (Sublet)', dollar(val(fees.leases||{}, 'Lease move out fee'))),
+    renderRowIf('Security Deposit (Sublet)', dollar(val(fees.leases||{}, 'Lease move in deposit'))),
+  ].join('');
+
+  const altPct = val(fees.alterations||{}, 'Alteration sec deposit (%)');
+  const altHtml = meaningful(altPct) ? renderRow('Alteration Security Deposit (%)', `${altPct}%`) : '';
+
+  feesEl.innerHTML =
+    `${salesHtml ? '<h4>Sales</h4>'+salesHtml : ''}${leaseHtml ? '<h4>Leases</h4>'+leaseHtml : ''}${altHtml ? '<h4>Alterations</h4>'+altHtml : ''}`
+    || renderRow('Fees','No fee data');
+
+  /* Fee Policies */
+  const feePolicyRows = [
+    ['Flip Tax', val(feePolicies,'Flip Tax')],
+    ['Sublet Fee', val(feePolicies,'Sublet Fee')],
+    ['Capital Contribution', val(feePolicies,'Capital Contribution')],
+  ].map(([label,value])=>renderRowIf(label, value)).join('');
+  feePoliciesEl.innerHTML = feePolicyRows || renderRow('Fee Policies','No policy data');
+
+  /* Building Policies — preferred order first, then the rest */
+  const rows=[];
+  const preferredOrder = [
+    'LLCs allowed',
+    'Pied a terre',
+    'Trusts allowed',
+    'Gifting allowed?',
+    'Co-purchasing',
+    'Fee simple',
+    'Right of First Refusal',
+    'Utilities included',
+    'HVAC',
+    'Sublet policy?',
+    'Pet Policy'
+  ];
+  const keySet = new Set(Object.keys(buildingPolicies));
+  const visited = new Set();
+
+  const subletKey = Array.from(keySet).find(k => k.toLowerCase().startsWith('sublet policy'));
+
+  const subletDocField = data.Documents?.['Sublet policy document'] ?? buildingPolicies['Sublet policy document'];
+  const subletProofField = feePolicies['Proof for policies and fees'] ??
+                           buildingPolicies['Proof for policies and fees'] ??
+                           data.Documents?.['Proof for policies and fees'];
+  const subletLinks = uniqueByUrl([...normalizeAttachments(subletDocField), ...normalizeAttachments(subletProofField)])
+                        .slice(0, MAX_DOC_LINKS);
+
+  const renderOne = (k, v)=>{
+    if (!meaningful(v)) return;
+
+    if (isChipField(k)) {
+      const items = toChipItems(v);
+      if (items.length){ rows.push(renderRow(k, renderChips(items))); return; }
+    }
+
+    if (subletKey && k === subletKey && subletLinks.length){
+      const links = subletLinks.map((a,i)=>`<a href="${a.url}" target="_blank" rel="noopener">Policy ${i+1}</a>`).join('');
+      rows.push(renderRow(k, `<div class="stack-links">${links}</div>`));
+      return;
+    }
+
+    const text = Array.isArray(v) ? v.map(x => String(x).trim()).filter(Boolean).join(', ') : String(v);
+    rows.push(renderRow(k, renderClamped(text)));
+  };
+
+  preferredOrder.forEach(label => {
+    const actualKey = (label.toLowerCase().startsWith('sublet policy')) ? (subletKey || label) : label;
+    if (keySet.has(actualKey)){
+      visited.add(actualKey);
+      renderOne(actualKey, buildingPolicies[actualKey]);
+    }
+  });
+
+  Array.from(keySet).forEach(k => {
+    if (visited.has(k)) return;
+    renderOne(k, buildingPolicies[k]);
+  });
+
+  buildingPoliciesEl.innerHTML = rows.join('') || renderRow('Policies','No policy data');
+
+  requestAnimationFrame(()=>{
+    document.querySelectorAll('.clamp-wrap').forEach(wrap=>{
+      const text = wrap.querySelector('.clamp-text');
+      if (!text) return;
+      
+      // Force a reflow to get accurate measurements
+      text.style.display = 'block';
+      const lineHeight = parseInt(window.getComputedStyle(text).lineHeight) || 20;
+      const maxHeight = lineHeight * 3;
+      const actualHeight = text.scrollHeight;
+      const overflow = actualHeight > maxHeight;
+      
+      // Reset to clamped display
+      text.style.display = '-webkit-box';
+      
+      wrap.setAttribute('data-overflow', overflow ? 'true' : 'false');
+      
+      // Debug logging
+      console.log(`Text overflow check:`, {
+        label: wrap.closest('.data-row')?.querySelector('.label')?.textContent,
+        lineHeight,
+        maxHeight,
+        actualHeight,
+        overflow,
+        hasToggle: wrap.querySelector('.toggle') !== null
+      });
+      
+      // Force show toggle if we detect overflow
+      if (overflow) {
+        const toggle = wrap.querySelector('.toggle');
+        if (toggle) {
+          toggle.style.display = 'inline-block';
+          // Add visual indicator for debugging
+          wrap.style.border = '2px solid red';
+        }
+      }
+      
+      // Fallback: if text is longer than 100 characters, show toggle anyway
+      const textContent = text.textContent || '';
+      if (textContent.length > 100) {
+        const toggle = wrap.querySelector('.toggle');
+        if (toggle) {
+          toggle.style.display = 'inline-block';
+          wrap.setAttribute('data-overflow', 'true');
+          console.log(`Fallback: Long text detected (${textContent.length} chars), showing toggle for:`, wrap.closest('.data-row')?.querySelector('.label')?.textContent);
+        }
+      }
+    });
+  });
+
+  if (documentsEl) documentsEl.innerHTML = '';
+}
+})();
+</script>
+
