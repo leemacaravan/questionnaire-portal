@@ -1,4 +1,4 @@
-<!-- Softr HTML Block (robust webhook parse + utilities pills) -->
+<!-- Softr HTML Block (robust webhook parse + utilities pills + preferred policy order) -->
 <div class="container">
   <div class="outer-card">
     <div class="page-title">Basic building information</div>
@@ -38,7 +38,7 @@
 
     <div class="section" style="display:none">
       <button class="section-head" type="button" data-target="#documents-section">
-        <div class="head-left"><span class="head-icon">📎</span><div><div class="head-title">Application Documents</div><div class="head-caption">Files and excerpts</div></div></div>
+        <div class="head-left"><span class="head-icon">📎</span><div><div class="head-title">Application Documents</div><div class="head-caption">Files and policies</div></div></div>
         <span class="chevron">▾</span>
       </button>
       <div class="section-body" id="documents-section">Loading documents...</div>
@@ -79,7 +79,7 @@
   .value a{ color:var(--brand); text-decoration:underline; }
   .data-row:hover{ background:#fbfcff; }
 
-  .read-more{ display:inline-block; margin-top:8px; padding:0; border:0; background:none; color:var(--brand); font:inherit; font-weight:700; cursor:pointer; text-decoration:underline; }
+  .read-more{ display:inline-block; margin-top:8px; padding:0; border:0; background:none; color:#2563eb; font:inherit; font-weight:700; cursor:pointer; text-decoration:underline; }
 
   /* CHIP/TAG boxes – used ONLY for Utilities/HVAC */
   .pills{ display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end; }
@@ -151,11 +151,8 @@ async function fetchData(){
 
 // --- Robustly extract JSON from noisy responses ---
 function extractJsonFromRaw(raw){
-  // Remove XSSI guards and leading noise lines
   let txt = raw.replace(/^\)\]\}'\n?/, '').replace(/^[^\[{]*?(?=[\[{])/, '');
-  // Try fast parse
   try { return JSON.parse(txt); } catch {}
-  // Find first opening brace/bracket and walk to matching close
   const openIdx = txt.search(/[\[{]/);
   if(openIdx === -1) throw new Error('No JSON braces in response');
   const openCh = txt[openIdx];
@@ -163,19 +160,13 @@ function extractJsonFromRaw(raw){
   let depth = 0, inStr = false, esc = false, endIdx = -1;
   for(let i=openIdx;i<txt.length;i++){
     const c = txt[i];
-    if(inStr){
-      if(esc){ esc=false; continue; }
-      if(c==='\\') esc=true; else if(c==='"') inStr=false;
-      continue;
-    }
+    if(inStr){ if(esc){ esc=false; continue; } if(c==='\\'){ esc=true; } else if(c==='"'){ inStr=false; } continue; }
     if(c==='"'){ inStr=true; continue; }
-    if(c===openCh) depth++;
-    else if(c===closeCh){ depth--; if(depth===0){ endIdx=i; break; } }
+    if(c===openCh) depth++; else if(c===closeCh){ depth--; if(depth===0){ endIdx=i; break; } }
   }
   if(endIdx!==-1){
     const slice = txt.slice(openIdx, endIdx+1);
     try { return JSON.parse(slice); } catch {}
-    // Last-ditch: remove trailing commas
     const repaired = slice.replace(/,\s*(?=[}\]])/g,'');
     return JSON.parse(repaired);
   }
@@ -188,6 +179,12 @@ async function webhook(buildingId){
     body:JSON.stringify({ buildingId })
   });
   const raw = await res.text();
+  // Guard: if Make responds with 202/Accepted (no JSON), fall back to cache or error nicely
+  if (res.status === 202 || /^\s*Accepted\s*$/i.test(raw)){
+    const cached = sessionStorage.getItem(buildingId);
+    if (cached) return JSON.parse(cached);
+    throw new Error('Backend returned 202 Accepted without JSON. Configure a Webhook response to return JSON.');
+  }
   try { return extractJsonFromRaw(raw); } catch(e){
     console.error('Webhook body (first 400 chars):', raw.slice(0,400));
     throw new Error('Webhook returned non-JSON.');
@@ -272,13 +269,13 @@ function extractJsonObjects(str){
 
 function normalizeAttachments(field){
   const out=[];
-  const pushMaybe = att=>{ if(!att||!att.url) return; const url=String(att.url).replace(/\s/g,'%20'); if(!out.some(x=>x.url===url)) out.push({ url, filename: att.filename || 'Excerpt' }); };
+  const pushMaybe = att=>{ if(!att||!att.url) return; const url=String(att.url).replace(/\s/g,'%20'); if(!out.some(x=>x.url===url)) out.push({ url, filename: att.filename || 'Policy' }); };
   const fromString = s=>{
     const str=s.trim();
     if(str.startsWith('{') && str.endsWith('}')){ try{ pushMaybe(JSON.parse(str)); return; }catch{} }
     const blobs=extractJsonObjects(str);
     if(blobs.length){ blobs.forEach(b=>{ try{ pushMaybe(JSON.parse(b)); }catch{} }); return; }
-    (str.match(/https?:\/\/[^\s"']+/g)||[]).forEach(u=>pushMaybe({url:u, filename:'Excerpt'}));
+    (str.match(/https?:\/\/[^\s"']+/g)||[]).forEach(u=>pushMaybe({url:u, filename:'Policy'}));
   };
   const fromEntry = e=>{ if(!e) return; if(Array.isArray(e)) e.forEach(fromEntry); else if(typeof e==='object') pushMaybe(e); else if(typeof e==='string') fromString(e); };
   fromEntry(field);
@@ -298,6 +295,7 @@ function render(data){
   const feePolicies = data.feePolicies || {};
   const buildingPolicies = data.buildingPolicies || {};
 
+  /* Fees */
   const salesHtml = [
     renderRowIf('Application Fee (Sale)', dollar(val(fees.sales||{}, 'Sale building application fee')), {expand:false}),
     renderRowIf('Move-in Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move in fee')), {expand:false}),
@@ -318,6 +316,7 @@ function render(data){
 
   feesEl.innerHTML = `${salesHtml ? '<h4>Sales</h4>'+salesHtml : ''}${leaseHtml ? '<h4>Leases</h4>'+leaseHtml : ''}${altHtml ? '<h4>Alterations</h4>'+altHtml : ''}` || renderRow('Fees','No fee data');
 
+  /* Fee Policies */
   const feePolicyRows = [
     ['Flip Tax', val(feePolicies,'Flip Tax')],
     ['Sublet Fee', val(feePolicies,'Sublet Fee')],
@@ -325,31 +324,57 @@ function render(data){
   ].map(([label,value])=>renderRowIf(label, value)).join('');
   feePoliciesEl.innerHTML = feePolicyRows || renderRow('Fee Policies','No policy data');
 
+  /* Building Policies — preferred order first, then the rest */
   const rows=[];
-  const subletKey = Object.keys(buildingPolicies).find(k => k.toLowerCase().startsWith('sublet policy'));
+  const preferredOrder = [
+    'LLCs allowed',
+    'Trusts allowed',
+    'Gifting allowed?',
+    'Fee simple',
+    'Right of First Refusal',
+    'Pet Policy',
+    'Sublet policy?'
+  ];
+  const keySet = new Set(Object.keys(buildingPolicies));
+  const visited = new Set();
 
+  // sublet key detection (handles variations like "Sublet policy", "Sublet Policy?", etc.)
+  const subletKey = Array.from(keySet).find(k => k.toLowerCase().startsWith('sublet policy'));
+
+  // attachments for sublet
   const subletDocField = data.Documents?.['Sublet policy document'] ?? buildingPolicies['Sublet policy document'];
   const subletProofField = feePolicies['Proof for policies and fees'] ?? buildingPolicies['Proof for policies and fees'] ?? data.Documents?.['Proof for policies and fees'];
   const subletLinks = uniqueByUrl([...normalizeAttachments(subletDocField), ...normalizeAttachments(subletProofField)]).slice(0, MAX_DOC_LINKS);
 
-  Object.entries(buildingPolicies).forEach(([k,v])=>{
-    if(k.toLowerCase().includes('sublet policy document')) return;
+  const renderOne = (k, v)=>{
     if (!meaningful(v)) return;
-
-    if(k===subletKey && subletLinks.length){
-      const links = subletLinks.map((a,i)=>`<a href="${a.url}" target="_blank" rel="noopener">Excerpt ${i+1}</a>`).join('<br>');
-      rows.push(renderRow(k, links));
-      return;
-    }
-
     if (isChipField(k)){
       const items = toChipItems(v);
       if (items.length){ rows.push(renderRow(k, renderChips(items))); return; }
     }
-
+    if (subletKey && k === subletKey && subletLinks.length){
+      const links = subletLinks.map((a,i)=>`<a href="${a.url}" target="_blank" rel="noopener">Policy ${i+1}</a>`).join('<br>');
+      rows.push(renderRow(k, links));
+      return;
+    }
     let text = v;
     if (Array.isArray(v)) text = v.map(x => String(x).trim()).filter(Boolean).join(', ');
     rows.push(renderRow(k, makeExpandable(String(text))));
+  };
+
+  // 1) Preferred fields in requested order
+  preferredOrder.forEach(label => {
+    const actualKey = (label.toLowerCase().startsWith('sublet policy')) ? (subletKey || label) : label;
+    if (keySet.has(actualKey)){
+      visited.add(actualKey);
+      renderOne(actualKey, buildingPolicies[actualKey]);
+    }
+  });
+
+  // 2) The rest (everything not yet rendered), original order preserved
+  Array.from(keySet).forEach(k => {
+    if (visited.has(k)) return;
+    renderOne(k, buildingPolicies[k]);
   });
 
   buildingPoliciesEl.innerHTML = rows.join('') || renderRow('Policies','No policy data');
