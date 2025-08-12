@@ -4,16 +4,28 @@
     <div class="page-title">Basic building information</div>
     <div class="subtitle">Essential building information available at no charge. This includes fees, policies, and application documents.</div>
 
-    <div class="info-card">
-      <div class="card-title">💵 Basic building information</div>
-      <div class="card-subtitle">Essential building information available at no charge</div>
-    </div>
-
     <!-- Section: Fees -->
     <div class="section">
       <button class="section-head" type="button" data-target="#fees-section">
-        <div class="head-left"><span class="head-icon">$</span><div><div class="head-title">Building Fees</div><div class="head-caption">Move in/out fees, deposits, application fees</div></div></div>
-        <span class="chevron">▾</span>
+        <div class="head-left">
+          <span class="head-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0_672_11252)">
+                <path d="M3 3H21C21.2652 3 21.5196 3.10536 21.7071 3.29289C21.8946 3.48043 22 3.73478 22 4V20C22 20.2652 21.8946 20.5196 21.7071 20.7071C21.5196 20.8946 21.2652 21 21 21H3C2.73478 21 2.48043 20.8946 2.29289 20.7071C2.10536 20.5196 2 20.2652 2 20V4C2 3.73478 2.10536 3.48043 2.29289 3.29289C2.48043 3.10536 2.73478 3 3 3ZM20 11H4V19H20V11ZM20 9V5H4V9H20ZM14 15H18V17H14V15Z" fill="currentColor"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_672_11252">
+                  <rect width="24" height="24" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </span>
+          <div>
+            <div class="head-title">Building Fees</div>
+            <div class="head-caption">Move in/out fees, deposits, application fees</div>
+          </div>
+        </div>
+        <span class="chevron">▼</span>
       </button>
       <div class="section-body" id="fees-section">Loading fees...</div>
     </div>
@@ -21,8 +33,25 @@
     <!-- Section: Fee Policies -->
     <div class="section">
       <button class="section-head" type="button" data-target="#fee-policies-section">
-        <div class="head-left"><span class="head-icon">📄</span><div><div class="head-title">Building Fee Policies</div><div class="head-caption">Flip tax, sublet fee, capital contribution</div></div></div>
-        <span class="chevron">▾</span>
+        <div class="head-left">
+          <span class="head-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0_672_10392)">
+                <path d="M21 8V20.993C21.0009 21.1243 20.976 21.2545 20.9266 21.3762C20.8772 21.4979 20.8043 21.6087 20.7121 21.7022C20.6199 21.7957 20.5101 21.8701 20.3892 21.9212C20.2682 21.9723 20.1383 21.9991 20.007 22H3.993C3.72981 22 3.47739 21.8955 3.2912 21.7095C3.105 21.5235 3.00027 21.2712 3 21.008V2.992C3 2.455 3.449 2 4.002 2H14.997L21 8ZM19 9H14V4H5V20H19V9ZM8 7H11V9H8V7ZM8 11H16V13H8V11ZM8 15H16V17H8V15Z" fill="currentColor"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_672_10392">
+                  <rect width="24" height="24" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </span>
+          <div>
+            <div class="head-title">Building Fee Policies</div>
+            <div class="head-caption">Flip tax, sublet fee, capital contribution</div>
+          </div>
+        </div>
+        <span class="chevron">▼</span>
       </button>
       <div class="section-body" id="fee-policies-section">Loading fee policies...</div>
     </div>
@@ -30,18 +59,72 @@
     <!-- Section: Building Policies -->
     <div class="section">
       <button class="section-head" type="button" data-target="#building-policies-section">
-        <div class="head-left"><span class="head-icon">🏛️</span><div><div class="head-title">Building Policies</div><div class="head-caption">House rules, leasing, ownership allowances</div></div></div>
-        <span class="chevron">▾</span>
+        <div class="head-left">
+          <span class="head-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0_672_8256)">
+                <path d="M22 21H2V19H3V4C3 3.73478 3.10536 3.48043 3.29289 3.29289C3.48043 3.10536 3.73478 3 4 3H18C18.2652 3 18.5196 3.10536 18.7071 3.29289C18.8946 3.48043 19 3.73478 19 4V9H21V19H22V21ZM17 19H19V11H13V19H15V13H17V19ZM17 9V5H5V19H11V9H17ZM7 11H9V13H7V11ZM7 15H9V17H7V15ZM7 7H9V9H7V7Z" fill="currentColor"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_672_8256">
+                  <rect width="24" height="24" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </span>
+          <div>
+            <div class="head-title">Building Policies</div>
+            <div class="head-caption">House rules, leasing, ownership allowances</div>
+          </div>
+        </div>
+        <span class="chevron">▼</span>
       </button>
       <div class="section-body" id="building-policies-section">Loading policies...</div>
     </div>
 
-    <div class="section" style="display:none">
-      <button class="section-head" type="button" data-target="#documents-section">
-        <div class="head-left"><span class="head-icon">📎</span><div><div class="head-title">Application Documents</div><div class="head-caption">Files and policies</div></div></div>
-        <span class="chevron">▾</span>
+    <!-- Section: Application Documents -->
+    <div class="section">
+      <button class="section-head" type="button" data-target="#application-documents-section">
+        <div class="head-left">
+          <span class="head-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g clip-path="url(#clip0_672_10392)">
+                <path d="M21 8V20.993C21.0009 21.1243 20.976 21.2545 20.9266 21.3762C20.8772 21.4979 20.8043 21.6087 20.7121 21.7022C20.6199 21.7957 20.5101 21.8701 20.3892 21.9212C20.2682 21.9723 20.1383 21.9991 20.007 22H3.993C3.72981 22 3.47739 21.8955 3.2912 21.7095C3.105 21.5235 3.00027 21.2712 3 21.008V2.992C3 2.455 3.449 2 4.002 2H14.997L21 8ZM19 9H14V4H5V20H19V9ZM8 7H11V9H8V7ZM8 11H16V13H8V11ZM8 15H16V17H8V15Z" fill="currentColor"/>
+              </g>
+              <defs>
+                <clipPath id="clip0_672_10392">
+                  <rect width="24" height="24" fill="white"/>
+                </clipPath>
+              </defs>
+            </svg>
+          </span>
+          <div>
+            <div class="head-title">Application Documents</div>
+            <div class="head-caption">Sales applications, alteration agreements, lease applications</div>
+          </div>
+        </div>
+        <span class="chevron">▼</span>
       </button>
-      <div class="section-body" id="documents-section">Loading documents...</div>
+      <div class="section-body" id="application-documents-section">
+        <div class="data-row">
+          <div class="label">Sales, Leases, Alteration Portal</div>
+          <div class="value">
+            <a href="https://transfers.joindaisy.com/" target="_blank" rel="noopener noreferrer" class="link">
+              https://transfers.joindaisy.com/
+            </a>
+          </div>
+        </div>
+        
+        <div class="data-row">
+          <div class="label">Sales</div>
+          <div class="value">Sales Application</div>
+        </div>
+        
+        <div class="data-row">
+          <div class="label">Alterations</div>
+          <div class="value">Alteration Agreement</div>
+        </div>
+      </div>
     </div>
   </div>
   
@@ -116,22 +199,57 @@
   .section-head{ width:100%; display:flex; align-items:center; justify-content:space-between; background:#f8fafc; border:0; padding:14px 16px; cursor:pointer; font:inherit; text-align:left; color:var(--fg); }
   .section-head:hover{ background:#f1f5f9; }
   .head-left{ display:flex; gap:12px; align-items:center;}
-  .head-icon{ width:28px; height:28px; display:inline-grid; place-items:center; background:var(--daisy-green); color:#fff; border-radius:4px; font-weight:700; }
-  .head-title{ font-weight:700; }
-  .head-caption{ font-size:12px; color:var(--muted); margin-top:2px; }
+  .head-icon{ width:28px; height:28px; display:inline-grid; place-items:center; background:var(--daisy-green); color:#fff; border-radius:4px; font-weight:400; }
+  .head-icon svg{ width:20px; height:20px; }
+  .head-title{ font-weight:400; font-size:16px; }
+  .head-caption{ font-size:12px; color:var(--muted); margin-top:2px; letter-spacing:0.05em; }
   .chevron{ transition:transform .25s ease; color:var(--muted); }
   .section.open .chevron{ transform:rotate(-180deg); }
 
   .section-body{ display:none; padding:14px; background:#fff; }
   .section.open .section-body{ display:block; }
 
-  .section-body h4{ font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); margin:14px 4px 8px; }
+  .section-body h4{ font-size:12px; letter-spacing:.05em; color:var(--muted); margin:14px 4px 8px; font-weight:400; }
 
-  .data-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; background:var(--row-bg); border:1px solid var(--border); border-radius:4px; margin:8px 0; }
-  .label{ font-weight:500; flex:0 0 280px; color:var(--fg); }
-  .value{ font-weight:700; color:var(--fg); text-align:right; white-space:normal; word-break:break-word; display:flex; flex-direction:column; align-items:flex-end; gap:6px; width:100%; }
+  .data-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:14px 16px; background:var(--row-bg); border:1px solid var(--border); border-radius:4px; margin:8px 0; }
+  .label{ font-weight:400; flex:0 0 280px; color:var(--muted); font-size:12px; letter-spacing:0.05em; }
+  .value{ font-weight:400; color:var(--fg); white-space:normal; word-break:break-word; display:flex; flex-direction:column; align-items:flex-end; gap:6px; width:100%; max-width:400px; }
   .value a{ color:var(--daisy-green); text-decoration:underline; }
   .data-row:hover{ background:#f8fafc; }
+  
+  /* Special styling for utilities and HVAC containers */
+  .data-row.utility-hvac-row {
+    background: var(--daisy-mint);
+    border: 1px solid var(--daisy-grass);
+    border-radius: 4px;
+  }
+  
+  .data-row.utility-hvac-row:hover {
+    background: var(--daisy-off);
+  }
+  
+  .data-row.utility-hvac-row .label {
+    color: var(--daisy-deep);
+  }
+  
+  .data-row.utility-hvac-row .value {
+    color: var(--daisy-deep);
+  }
+  
+  /* Left-align long descriptive text, keep simple values right-aligned */
+  .value .clamp-wrap {
+    text-align: left;
+    align-items: flex-start;
+  }
+  
+  .value .clamp-text {
+    text-align: left;
+  }
+  
+  /* Keep simple values (Yes/No, fees) right-aligned */
+  .value:not(:has(.clamp-wrap)) {
+    text-align: right;
+  }
 
   /* 3-line clamp UI */
   .clamp-wrap{ max-width:100%; }
@@ -159,9 +277,9 @@
   
   /* Subtle visual feedback for expanded text - just a green left border line */
   .clamp-wrap[data-expanded="true"] .clamp-text {
-    border-left: 3px solid var(--daisy-green);
-    padding-left: 12px;
-    margin-left: 4px;
+    /* Removed green border line */
+    padding-left: 0;
+    margin-left: 0;
     transition: all 0.3s ease;
   }
 
@@ -673,7 +791,7 @@ function render(data){
   const feesEl = byId('fees-section');
   const feePoliciesEl = byId('fee-policies-section');
   const buildingPoliciesEl = byId('building-policies-section');
-  const documentsEl = byId('documents-section');
+  const documentsEl = byId('application-documents-section');
   if(!feesEl || !feePoliciesEl || !buildingPoliciesEl || !documentsEl) return;
 
   const fees = data.fees || {};
