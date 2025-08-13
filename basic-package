@@ -81,18 +81,18 @@
       </button>
       <div class="section-body" id="building-policies-section">Loading policies...</div>
     </div>
-
+    
     <!-- Section: Application Documents -->
-    <div class="section">
+    <div class="section application-docs">
       <button class="section-head" type="button" data-target="#application-documents-section">
         <div class="head-left">
           <span class="head-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <g clip-path="url(#clip0_672_10392)">
-                <path d="M21 8V20.993C21.0009 21.1243 20.976 21.2545 20.9266 21.3762C20.8772 21.4979 20.8043 21.6087 20.7121 21.7022C20.6199 21.7957 20.5101 21.8701 20.3892 21.9212C20.2682 21.9723 20.1383 21.9991 20.007 22H3.993C3.72981 22 3.47739 21.8955 3.2912 21.7095C3.105 21.5235 3.00027 21.2712 3 21.008V2.992C3 2.455 3.449 2 4.002 2H14.997L21 8ZM19 9H14V4H5V20H19V9ZM8 7H11V9H8V7ZM8 11H16V13H8V11ZM8 15H16V17H8V15Z" fill="currentColor"/>
+              <g clip-path="url(#clip0_672_4242)">
+                <path d="M4 2C3.73478 2 3.48043 2.10536 3.29289 2.29289C3.10536 2.48043 3 2.73478 3 3V21C3 21.2652 3.10536 21.5196 3.29289 21.7071C3.48043 21.8946 3.73478 22 4 22H20C20.2652 22 20.5196 21.8946 20.7071 21.7071C20.8946 21.5196 21 21.2652 21 21V8L15 2H4ZM14 3.5L19.5 9H14V3.5ZM7 11H17V13H7V11ZM7 15H17V17H7V15Z" fill="currentColor"/>
               </g>
               <defs>
-                <clipPath id="clip0_672_10392">
+                <clipPath id="clip0_672_4242">
                   <rect width="24" height="24" fill="white"/>
                 </clipPath>
               </defs>
@@ -100,31 +100,12 @@
           </span>
           <div>
             <div class="head-title">Application Documents</div>
-            <div class="head-caption">Sales applications, alteration agreements, lease applications</div>
+            <div class="head-caption">Forms and submission info</div>
           </div>
         </div>
         <span class="chevron">▼</span>
       </button>
-      <div class="section-body" id="application-documents-section">
-        <div class="data-row">
-          <div class="label">Sales, Leases, Alteration Portal</div>
-          <div class="value">
-            <a href="https://transfers.joindaisy.com/" target="_blank" rel="noopener noreferrer" class="link">
-              https://transfers.joindaisy.com/
-            </a>
-          </div>
-        </div>
-        
-        <div class="data-row">
-          <div class="label">Sales</div>
-          <div class="value">Sales Application</div>
-        </div>
-        
-        <div class="data-row">
-          <div class="label">Alterations</div>
-          <div class="value">Alteration Agreement</div>
-        </div>
-      </div>
+      <div class="section-body" id="application-documents-section">Loading application documents...</div>
     </div>
   </div>
   
@@ -329,6 +310,11 @@
     .print-controls,
     .section-head,
     .toggle {
+      display: none !important;
+    }
+    
+    /* Hide the entire Application Documents section in print */
+    .application-docs {
       display: none !important;
     }
     
@@ -791,8 +777,8 @@ function render(data){
   const feesEl = byId('fees-section');
   const feePoliciesEl = byId('fee-policies-section');
   const buildingPoliciesEl = byId('building-policies-section');
-  const documentsEl = byId('application-documents-section');
-  if(!feesEl || !feePoliciesEl || !buildingPoliciesEl || !documentsEl) return;
+  const appDocsEl = byId('application-documents-section');
+  if(!feesEl || !feePoliciesEl || !buildingPoliciesEl) return;
 
   const fees = data.fees || {};
   const feePolicies = data.feePolicies || {};
@@ -939,8 +925,126 @@ function render(data){
     });
   });
 
-  if (documentsEl) documentsEl.innerHTML = '';
+  /* Application Documents — grouped rows (Sales, Alterations, Leases) */
+  if (appDocsEl) {
+    const portalUrl = 'https://transfers.joindaisy.com/';
+
+    // Build portal URLs with page params (buildingId, optional unitId)
+    const qsParams = new URLSearchParams(window.location.search);
+    const fromDataBuildingId = (data && (data.buildingId || data.BuildingId || data.id)) || '';
+    const buildingIdParam = qsParams.get('buildingId') || fromDataBuildingId || '';
+    const unitIdParam = qsParams.get('unitId') || qsParams.get('unit') || '';
+    const recordIdParam = qsParams.get('recordId') || '';
+    const transactionIdParam = qsParams.get('transactionId') || '';
+    const withParams = (base, params) => {
+      try {
+        const url = new URL(base);
+        Object.entries(params).forEach(([k, v]) => {
+          if (v != null && String(v).trim() !== '') url.searchParams.set(k, String(v));
+        });
+        return url.toString();
+      } catch {
+        const nonEmpty = Object.entries(params).filter(([,v]) => v != null && String(v).trim() !== '');
+        if (!nonEmpty.length) return base;
+        const query = nonEmpty.map(([k,v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`).join('&');
+        return base + (base.includes('?') ? '&' : '?') + query;
+      }
+    };
+    const portalWithParams = withParams(portalUrl, { buildingId: buildingIdParam, unitId: unitIdParam });
+    const salesFormUrl = withParams('https://transfers.joindaisy.com/sales-form', {
+      recordId: recordIdParam,
+      buildingId: buildingIdParam,
+      transactionId: transactionIdParam
+    });
+    const alterationsEduUrl = withParams('https://transfers.joindaisy.com/alterations-education', {
+      buildingId: buildingIdParam,
+      recordId: recordIdParam
+    });
+    const salesPortalHref = recordIdParam ? salesFormUrl : 'https://transfers.joindaisy.com/sales';
+    const alterationsPlatformHref = recordIdParam ? alterationsEduUrl : 'https://transfers.joindaisy.com/alterations';
+
+    // Parse documents to find latest per type from Documents['Sales/Alteration Documents']
+    const raw = data.Documents?.['Sales/Alteration Documents'];
+    const typeToDocs = { SALES_APPLICATION: [], ALTERATION_AGREEMENT: [] };
+
+    const considerDoc = (doc)=>{
+      if (!doc || !doc.type) return;
+      const type = String(doc.type).toUpperCase();
+      if (!(type in typeToDocs)) return;
+      const url = doc.file?.signedPaths?.signedPath || doc.file?.signedPath || doc.file?.url;
+      if (!url) return;
+      const createdAt = Number(doc.createdAt) || 0;
+      typeToDocs[type].push({ url, createdAt });
+    };
+
+    const parseEntry = (entry)=>{
+      if (!entry) return;
+      if (typeof entry === 'string') {
+        try {
+          const obj = JSON.parse(entry);
+          if (Array.isArray(obj)) {
+            obj.forEach(considerDoc);
+          } else if (obj && Array.isArray(obj.documents)) {
+            obj.documents.forEach(considerDoc);
+          } else if (obj && obj.documentId) {
+            considerDoc(obj);
+          } else {
+            extractJsonObjects(entry).forEach(chunk => { try { considerDoc(JSON.parse(chunk)); } catch {} });
+          }
+        } catch {
+          extractJsonObjects(entry).forEach(chunk => {
+            try {
+              const obj = JSON.parse(chunk);
+              if (obj && Array.isArray(obj.documents)) obj.documents.forEach(considerDoc);
+              else considerDoc(obj);
+            } catch {}
+          });
+        }
+        return;
+      }
+      if (Array.isArray(entry)) { entry.forEach(parseEntry); return; }
+      if (entry && typeof entry === 'object') {
+        if (Array.isArray(entry.documents)) { entry.documents.forEach(considerDoc); return; }
+        considerDoc(entry);
+      }
+    };
+
+    parseEntry(raw);
+
+    const latestOf = (type) => {
+      const list = typeToDocs[type];
+      if (!list || !list.length) return null;
+      list.sort((a,b)=> b.createdAt - a.createdAt);
+      return list[0].url;
+    };
+
+    const salesAppUrl = latestOf('SALES_APPLICATION');
+    const alterationUrl = latestOf('ALTERATION_AGREEMENT');
+
+    const sections = [];
+
+    // Sales
+    sections.push(
+      `${'<h4>Sales</h4>'}`+
+      renderRow('Sales Application', salesAppUrl ? `<a href="${salesAppUrl}" target="_blank" rel="noopener">Download PDF</a>` : '-')+
+      renderRow('Sales Portal', `<a href="${salesPortalHref}" target="_blank" rel="noopener">Access online</a>`)
+    );
+
+    // Alterations
+    sections.push(
+      `${'<h4>Alterations</h4>'}`+
+      renderRow('Alteration agreement', alterationUrl ? `<a href="${alterationUrl}" target="_blank" rel="noopener">Download PDF</a>` : '-')+
+      renderRow('Alteration Platform', `<a href="${alterationsPlatformHref}" target="_blank" rel="noopener">Access online</a>`) 
+    );
+
+    // Leases
+    sections.push(
+      `${'<h4>Leases</h4>'}`+
+      renderRow('Daisy Transfers Portal', `<a href="${portalWithParams}" target="_blank" rel="noopener">Apply online</a>`)
+    );
+
+    appDocsEl.innerHTML = sections.join('');
+  }
 }
 })();
 </script>
-
