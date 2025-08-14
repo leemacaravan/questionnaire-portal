@@ -233,13 +233,7 @@
             </defs>
           </svg>
         </span>      </button>
-      <div class="section-body" id="unit-specific-info-section">
-        <div class="data-row"><span class="label">Monthly Common Charges</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Current Assessments</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Number of Shares</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Property Taxes</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Maintenance History</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-      </div>
+      <div class="section-body" id="unit-specific-info-section"></div>
     </div>
 
     <!-- Section: Building Information -->
@@ -276,13 +270,7 @@
           </svg>
         </span>
     </button>
-      <div class="section-body" id="building-info-section">
-        <div class="data-row"><span class="label">Total Floors</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Total Units</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Rental Units</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Pied-à-terre Units</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-        <div class="data-row"><span class="label">Owner Occupied</span><div class="value"><span class="hidden-pill">Hidden</span></div></div>
-      </div>
+      <div class="section-body" id="building-info-section"></div>
     </div>
 
     <!-- Footer purchase bar -->
@@ -370,6 +358,76 @@
   .data-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 16px; background:var(--row-bg); border:1px solid var(--border); border-radius:4px; margin:8px 0; }
   .label{ font-weight:400; flex:0 0 280px; color:var(--muted); font-size:12px; letter-spacing:0.05em; display:flex; align-items:center; }
   .value{ font-weight:400; color:var(--fg); white-space:normal; word-break:break-word; display:flex; flex-direction:column; align-items:flex-end; justify-content:center; gap:6px; width:100%; max-width:400px; }
+  
+  /* Unit breakdown section styling */
+  .section-body h4 {
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+    margin: 14px 4px 8px;
+    font-weight: 400;
+    text-transform: uppercase;
+  }
+  
+  /* 4-column grid layout for unit breakdown */
+  .unit-breakdown-4col {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 20px !important;
+    width: 100% !important;
+    max-width: none !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+  }
+  
+  /* Remove left margin since there's no label */
+  .unit-breakdown-grid .value {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+  }
+  
+  .grid-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .grid-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .grid-label {
+    font-size: 11px !important;
+    color: var(--muted) !important;
+    font-weight: 500 !important;
+    line-height: 1.2;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .grid-value {
+    font-size: 16px !important;
+    color: var(--fg) !important;
+    font-weight: 600 !important;
+    line-height: 1;
+  }
+  
+  /* Responsive grid for smaller screens */
+  @media (max-width: 768px) {
+    .unit-breakdown-4col {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 16px !important;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .unit-breakdown-4col {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+    }
+  }
   .value a{ color:var(--daisy-blue); text-decoration:none; }
   .value a:hover{ text-decoration:underline; }
   .data-row:hover{ background:#f8fafc; }
@@ -652,11 +710,19 @@ async function fetchData(){
     }
   } catch {}
 
-  const cached = sessionStorage.getItem(buildingId);
+  // Always re-fetch on load; do not rely on cache
   let data;
-  
   try {
-    data = cached ? JSON.parse(cached) : await webhook(buildingId, qs.get('transactionId'), qs.get('recordId'));
+    data = await webhook(buildingId, qs.get('transactionId'), qs.get('recordId'));
+    
+    // If webhook returned null due to cooldown, use cached data or fallback
+    if (data === null) {
+      console.log('📋 Webhook skipped due to cooldown, using existing data or fallback');
+      data = window.__cachedData || getFallbackData(buildingId);
+    } else {
+      // Cache successful response
+      window.__cachedData = data;
+    }
   } catch (error) {
     console.warn('Webhook failed, using fallback data:', error.message);
     if (error.message.includes('429') || error.message.includes('Too Many Requests')) showRateLimitMessage();
@@ -664,7 +730,6 @@ async function fetchData(){
   }
   
   const normalized = Array.isArray(data) ? (data[0] || {}) : data;
-  sessionStorage.setItem(buildingId, JSON.stringify(normalized));
   render(normalized);
 }
 
@@ -733,23 +798,172 @@ function extractJsonFromRaw(raw){
   throw new Error('Could not balance JSON braces');
 }
 
+// Webhook call tracking to prevent multiple simultaneous calls
+let webhookInProgress = false;
+let lastWebhookCall = 0;
+const WEBHOOK_COOLDOWN = 10000; // 10 seconds between calls (more aggressive)
+let webhookCallCount = 0;
+let consecutiveFailures = 0;
+const MAX_CONSECUTIVE_FAILURES = 2; // Stop trying after 2 consecutive failures
+let circuitBreakerOpen = false;
+const CIRCUIT_BREAKER_TIMEOUT = 300000; // 5 minutes
+let circuitBreakerOpenedAt = 0;
+
 async function webhook(buildingId, transactionId, recordId){
+  // Prevent multiple simultaneous webhook calls
+  if (webhookInProgress) {
+    console.log('🚫 Webhook already in progress, skipping duplicate call');
+    return null;
+  }
+  
+  // Circuit breaker - if we're getting consistent failures, stop all calls
+  if (circuitBreakerOpen) {
+    const timeSinceOpen = now - circuitBreakerOpenedAt;
+    if (timeSinceOpen < CIRCUIT_BREAKER_TIMEOUT) {
+      const remaining = CIRCUIT_BREAKER_TIMEOUT - timeSinceOpen;
+      console.log(`🚫 Circuit breaker open (${Math.round(remaining/1000)}s remaining), all webhook calls blocked`);
+      return null;
+    } else {
+      // Circuit breaker timeout expired, try to close it
+      console.log('🔄 Circuit breaker timeout expired, attempting to close...');
+      circuitBreakerOpen = false;
+      consecutiveFailures = 0;
+    }
+  }
+  
+  // If we're in a failure state, be more conservative
+  if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+    console.log(`🚫 In failure state (${consecutiveFailures} consecutive failures), webhook temporarily disabled`);
+    return null;
+  }
+  
+  // Rate limiting - enforce cooldown between calls
+  const now = Date.now();
+  if (now - lastWebhookCall < WEBHOOK_COOLDOWN) {
+    console.log(`⏳ Webhook cooldown active (${WEBHOOK_COOLDOWN - (now - lastWebhookCall)}ms remaining), skipping call`);
+    return null;
+  }
+  
+  // If we've had too many consecutive failures, extend the cooldown
+  if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+    const extendedCooldown = WEBHOOK_COOLDOWN * Math.pow(2, consecutiveFailures - MAX_CONSECUTIVE_FAILURES + 1);
+    if (now - lastWebhookCall < extendedCooldown) {
+      console.log(`🚫 Too many consecutive failures (${consecutiveFailures}), extended cooldown active (${extendedCooldown - (now - lastWebhookCall)}ms remaining)`);
+      return null;
+    }
+  }
+  
+  webhookInProgress = true;
+  webhookCallCount++;
+  lastWebhookCall = now;
+  
+  console.log(`🔄 Webhook call #${webhookCallCount} starting at ${new Date().toISOString()}`);
+  console.log(`📤 Payload:`, { buildingId, transactionId, recordId });
+  
+  const refreshId = `${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
+  const payload = {
+    buildingId,
+    transactionId,
+    recordId,
+    refreshId // ensure Make.com receives a unique event on each call
+  };
+  
   try {
-    const res = await fetch('https://hook.us1.make.com/uaahksz3fcajpj1eixp9unaxnkkumhr7',{
-      method:'POST', headers:{ 'Content-Type':'application/json', 'Accept':'application/json, text/plain, */*' },
-      body:JSON.stringify({ buildingId, transactionId, recordId })
-    });
-    const raw = await res.text();
-    if (res.status === 429) throw new Error('429 Too Many Requests: Rate limit exceeded. Please try again later.');
-    if (res.status === 202 || /^\s*Accepted\s*$/i.test(raw)) throw new Error('Backend returned 202 Accepted without JSON. The webhook needs to return data.');
-    if (!raw.trim()) throw new Error('Webhook returned empty response');
-    try { return extractJsonFromRaw(raw); }
-    catch(e){ console.error('Failed to parse webhook response:', e, raw.slice(0,400)); throw new Error(`Webhook returned non-JSON response: ${e.message}`); }
-  } catch (error) {
-    if (error.name === 'TypeError' && error.message.includes('fetch')) throw new Error('Network error: Unable to reach the webhook service');
-    throw error;
+    const attempt = async () => {
+      const res = await fetch(`https://hook.us1.make.com/uaahksz3fcajpj1eixp9unaxnkkumhr7?rid=${encodeURIComponent(refreshId)}` ,{
+        method:'POST',
+        cache:'no-store',
+        keepalive:true,
+        redirect:'follow',
+        headers:{
+          'Content-Type':'application/json',
+          'Accept':'application/json, text/plain, */*',
+          'Cache-Control':'no-cache, no-store, must-revalidate',
+          'Pragma':'no-cache'
+        },
+        body:JSON.stringify(payload)
+      });
+      const raw = await res.text();
+      return { res, raw };
+    };
+    
+    const delays = [0, 800, 1500, 3000, 5000];
+    for (let i=0;i<delays.length;i++){
+      if (delays[i]) {
+        console.log(`⏰ Retry attempt ${i+1}/${delays.length} in ${delays[i]}ms...`);
+        await new Promise(r=>setTimeout(r, delays[i]));
+      }
+      
+      try {
+        console.log(`🔄 Attempt ${i+1}: Calling webhook...`);
+        const { res, raw } = await attempt();
+        
+        if (res.status === 429) {
+          console.log(`🚫 Rate limited (429), attempt ${i+1} failed`);
+          consecutiveFailures++;
+          
+          // Open circuit breaker on rate limiting
+          if (!circuitBreakerOpen) {
+            circuitBreakerOpen = true;
+            circuitBreakerOpenedAt = now;
+            console.log('🚫 Circuit breaker opened due to rate limiting');
+          }
+          
+          throw new Error('429 Too Many Requests: Rate limit exceeded. Please try again later.');
+        }
+        
+        const isAccepted = res.status === 202 || /^\s*Accepted\s*$/i.test(raw);
+        const isEmpty = !raw.trim();
+        
+        if (isAccepted || isEmpty){
+          if (i < delays.length - 1) {
+            console.log(`⚠️ Got ${res.status} or empty response, retrying...`);
+            continue; // try again
+          }
+          throw new Error('Backend returned 202 Accepted without JSON. The webhook needs to return data.');
+        }
+        
+        console.log(`✅ Webhook successful on attempt ${i+1}! Response length: ${raw.length} chars`);
+        consecutiveFailures = 0; // Reset failure counter on success
+        try { 
+          const result = extractJsonFromRaw(raw);
+          console.log(`📥 Parsed JSON successfully`);
+          return result;
+        }
+        catch(e){ 
+          console.error('❌ Failed to parse webhook response:', e, raw.slice(0,400)); 
+          throw new Error(`Webhook returned non-JSON response: ${e.message}`); 
+        }
+      } catch (error) {
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          console.log(`🌐 Network error on attempt ${i+1}:`, error.message);
+          throw new Error('Network error: Unable to reach the webhook service');
+        }
+        if (i === delays.length - 1) throw error;
+      }
+    }
+  } finally {
+    webhookInProgress = false;
+    console.log(`🏁 Webhook call #${webhookCallCount} completed at ${new Date().toISOString()}`);
+    
+    // Log current failure state
+    if (consecutiveFailures > 0) {
+      console.log(`⚠️ Consecutive failures: ${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES}`);
+      if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+        console.log(`🚫 Webhook temporarily disabled. Will retry in ${WEBHOOK_COOLDOWN * Math.pow(2, consecutiveFailures - MAX_CONSECUTIVE_FAILURES + 1)}ms`);
+      }
+    }
   }
 }
+
+// Manual reset function for debugging
+window.resetWebhookFailures = () => {
+  consecutiveFailures = 0;
+  lastWebhookCall = 0;
+  circuitBreakerOpen = false;
+  circuitBreakerOpenedAt = 0;
+  console.log('🔄 Webhook failure state and circuit breaker manually reset');
+};
 
 /* ---------- config ---------- */
 const MAX_DOC_LINKS = Infinity;
@@ -829,6 +1043,19 @@ function render(data){
   const feePolicies = data.feePolicies || {};
   const buildingPolicies = data.buildingPolicies || {};
   const paidFlag = !!(data['PAID?'] || data['PAID? '] || data.paid || data.PAID);
+
+  // If paid, hide price badge and purchase button
+  try {
+    if (paidFlag) {
+      const badge = document.querySelector('.paid-badge');
+      if (badge) badge.style.display = 'none';
+      const cta = document.querySelector('.purchase-cta--detail');
+      if (cta) cta.style.display = 'none';
+      // Remove any blurred placeholder rows when paid
+      document.querySelectorAll('#unit-specific-info-section .data-row, #building-info-section .data-row')
+        .forEach(row => { if (row.querySelector('.hidden-pill')) row.remove(); });
+    }
+  } catch {}
 
     const salesHtml = [
       renderRowIf('Application Fee', dollar(val(fees.sales||{}, 'Sale building application fee'))),
@@ -911,6 +1138,8 @@ function render(data){
       };
       // Clear any previously injected paid rows on re-render
       document.querySelectorAll('.paid-insert').forEach(n=> n.parentNode && n.parentNode.removeChild(n));
+      // Finder helper available for both sections
+      const findVal = (obj, matcher) => { for (const [k,v] of Object.entries(obj||{})) if (matcher(k) && meaningful(v)) return v; return null; };
       if (unitInfoEl) {
         const monthlyTxt = paid['Monthly common charges'];
         if (meaningful(monthlyTxt)) {
@@ -927,8 +1156,8 @@ function render(data){
             if (m){ entries.push({ label: m[1].trim(), amount: `$${m[2]}` }); }
           }
           // Preferentially render Monthly Common Charges and Local Law 97 first, then others
-          const pickup = (key)=> entries.find(e=> e.label.toLowerCase().includes(key));
-          const mcc = pickup('monthly common charges');
+          const pickup = (predicate)=> entries.find(e=> predicate(e.label.toLowerCase()));
+          const mcc = pickup(l=> /monthly\s*common\s*charges|common\s*charges/.test(l));
           const ll97 = entries.find(e=> /local\s*law\s*97|roof\s*capital/i.test(e.label.toLowerCase()));
           const others = entries.filter(e=> e!==mcc && e!==ll97);
           if (mcc) unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Monthly Common Charges', mcc.amount));
@@ -938,13 +1167,148 @@ function render(data){
             unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow(e.label, e.amount));
           });
         }
+
+        // Number of shares
+        const shares = paid['Number of shares'] ?? findVal(paid, k=>/share/i.test(k));
+        if (meaningful(shares)) {
+          unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Number of Shares', String(shares)));
+        }
+
+        // Beds / Baths / Sq Ft — only show those that exist (each as its own row)
+        const beds = paid['beds'] ?? findVal(paid, k=>/bed/i.test(k));
+        const baths = paid['bath'] ?? findVal(paid, k=>/bath/i.test(k));
+        const sqFt = paid['Unit Sq Foot'] ?? paid['Unit Sq  Foot'] ?? paid['sqFoot'] ?? paid['sqft'] ?? findVal(paid, k=>/(unit\s*sq|sq\s*ft|square)/i.test(k));
+        if (meaningful(beds)) unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Bedrooms', String(beds)));
+        if (meaningful(baths)) unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Bathrooms', String(baths)));
+        if (meaningful(sqFt)) unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Square Footage', String(sqFt)));
+
+        // Current owners and % common — only if both exist
+        const owners = paid['Current Owners'] ?? paid['currentOwners'] ?? findVal(paid, k=>/current.*owner/i.test(k));
+        const percentCommon = paid['%comm'] ?? findVal(paid, k=>/(%|percent).*comm/i.test(k));
+        if (meaningful(owners) && meaningful(percentCommon)) {
+          unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Current Owners / % Common', `${owners} — ${percentCommon}`));
+        } else if (meaningful(owners)) {
+          unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Current Owners', String(owners)));
+        }
       }
       if (bldgInfoEl) {
-        const breakdown = paid['Unit breakdown'];
-        if (meaningful(breakdown)) {
-          const rowHtml = renderPaidRow('Unit breakdown', renderClamped(breakdown));
-          bldgInfoEl.insertAdjacentHTML('afterbegin', rowHtml);
+        // New unit breakdown fields - displayed in 2x2 grid format
+        const ownerOccupying = paid['Owner occupying units'] ?? paid['Owner occupying'] ?? findVal(paid, k=>/owner.*occupying/i.test(k));
+        const piedeTerre = paid['Pied e terre'] ?? paid['Pied a terre'] ?? findVal(paid, k=>/pied.*terre/i.test(k));
+        const rentedUnits = paid['Rented/investment units'] ?? paid['Rented units'] ?? paid['Investment units'] ?? findVal(paid, k=>/rented|investment.*units/i.test(k));
+        const sponsorUnits = paid['Sponsor units'] ?? paid['Sponsor owned'] ?? findVal(paid, k=>/sponsor.*units|sponsor.*owned/i.test(k));
+        const sponsorRenterUnits = paid['Sponsor renter units'] ?? paid['Sponsor rented'] ?? findVal(paid, k=>/sponsor.*renter|sponsor.*rented/i.test(k));
+        const commercialUnits = paid['Commercial units'] ?? paid['Commercial'] ?? findVal(paid, k=>/commercial.*units|commercial/i.test(k));
+        const superUnit = paid['Super unit'] ?? paid['Super units'] ?? findVal(paid, k=>/super.*unit/i.test(k));
+
+        // Create unit breakdown section with 4-column grid layout
+        if (meaningful(ownerOccupying) || meaningful(piedeTerre) || meaningful(rentedUnits) || 
+            meaningful(sponsorUnits) || meaningful(sponsorRenterUnits) || meaningful(commercialUnits) || meaningful(superUnit)) {
+          
+          // Create 4-column grid layout
+          const unitBreakdownGrid = `<div class="data-row unit-breakdown-grid">
+            <div class="value unit-breakdown-4col">
+              <div class="grid-col">
+                <div class="grid-item">
+                  <span class="grid-label">Unit Count (excluding commercial units)</span>
+                  <span class="grid-value">${(parseInt(ownerOccupying || 0) + parseInt(piedeTerre || 0) + parseInt(rentedUnits || 0) + parseInt(sponsorUnits || 0) + parseInt(sponsorRenterUnits || 0) + parseInt(superUnit || 0))}</span>
+                </div>
+                <div class="grid-item">
+                  <span class="grid-label">Owner Occupying Units</span>
+                  <span class="grid-value">${meaningful(ownerOccupying) ? ownerOccupying : '0'}</span>
+                </div>
+              </div>
+              <div class="grid-col">
+                <div class="grid-item">
+                  <span class="grid-label">Pied-à-terre Units</span>
+                  <span class="grid-value">${meaningful(piedeTerre) ? piedeTerre : '0'}</span>
+                </div>
+                <div class="grid-item">
+                  <span class="grid-label">Rented/Investment Units</span>
+                  <span class="grid-value">${meaningful(rentedUnits) ? rentedUnits : '0'}</span>
+                </div>
+              </div>
+              <div class="grid-col">
+                <div class="grid-item">
+                  <span class="grid-label">Sponsor Units</span>
+                  <span class="grid-value">${meaningful(sponsorUnits) ? sponsorUnits : '0'}</span>
+                </div>
+                <div class="grid-item">
+                  <span class="grid-label">Sponsor Renter Units</span>
+                  <span class="grid-value">${meaningful(sponsorRenterUnits) ? sponsorRenterUnits : '0'}</span>
+                </div>
+              </div>
+              <div class="grid-col">
+                <div class="grid-item">
+                  <span class="grid-label">Commercial Units</span>
+                  <span class="grid-value">${meaningful(commercialUnits) ? commercialUnits : '0'}</span>
+                </div>
+                <div class="grid-item">
+                  <span class="grid-label">Super Unit</span>
+                  <span class="grid-value">${meaningful(superUnit) ? superUnit : '0'}</span>
+                </div>
+              </div>
+            </div>
+          </div>`;
+          
+          // Insert the grid first, then the header above it
+          bldgInfoEl.insertAdjacentHTML('afterbegin', unitBreakdownGrid);
+          bldgInfoEl.insertAdjacentHTML('afterbegin', '<h4>Unit Breakdown</h4>');
         }
+
+        // Building-level paid fields
+        const legalName = paid['legal name'] ?? findVal(paid, k=>/legal\s*name/i.test(k));
+        if (meaningful(legalName)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Legal Name', String(legalName)));
+
+        const converted = paid['converted'] ?? findVal(paid, k=>/converted/i.test(k));
+        if (meaningful(converted)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Converted', String(converted)));
+
+        const floors = paid['floors'] ?? findVal(paid, k=>/floor(s)?/i.test(k));
+        if (meaningful(floors)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Floors', String(floors)));
+
+
+
+        const bSqFt = paid['building sq foot'] ?? paid['building sqft'] ?? findVal(paid, k=>/building.*(sq\s*ft|square)/i.test(k));
+        if (meaningful(bSqFt)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Building Sq Ft', String(bSqFt)));
+
+        const built = paid['built'] ?? findVal(paid, k=>/built/i.test(k));
+        if (meaningful(built)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Built', String(built)));
+
+        const percentOwnership = paid['Percent Ownership'] ?? paid['percentOwnership'] ?? findVal(paid, k=>/percent.*ownership(?!.*vot)/i.test(k));
+        if (meaningful(percentOwnership)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Percent Ownership', String(percentOwnership)));
+        const percentOwnershipVoting = paid['Percent Ownership Voting'] ?? paid['percentOwnershipVoting'] ?? findVal(paid, k=>/percent.*ownership.*vot/i.test(k));
+        if (meaningful(percentOwnershipVoting)) bldgInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Percent Ownership (Voting)', String(percentOwnershipVoting)));
+      }
+    }
+  } catch {}
+
+  // If not paid, blur placeholders for any non-empty computed rows and hide sections that would be empty
+  try {
+    if (!paidFlag) {
+      const maskRow = (label)=> renderRow(label, '<span class="hidden-pill">Hidden</span>');
+      const unitInfoEl = byId('unit-specific-info-section');
+      const bldgInfoEl = byId('building-info-section');
+      if (unitInfoEl && unitInfoEl.children.length === 0) {
+        const placeholders = [
+          'Monthly Common Charges',
+          'Current Assessments',
+          'Number of Shares',
+          'Property Taxes',
+          'Maintenance History'
+        ].map(maskRow).join('');
+        unitInfoEl.innerHTML = placeholders;
+      }
+      if (bldgInfoEl && bldgInfoEl.children.length === 0) {
+        const placeholders = [
+          'Owner Occupying Units',
+          'Pied-à-terre Units',
+          'Rented/Investment Units',
+          'Sponsor Units',
+          'Sponsor Renter Units',
+          'Commercial Units',
+          'Super Unit'
+        ].map(maskRow).join('');
+        bldgInfoEl.innerHTML = placeholders;
       }
     }
   } catch {}
