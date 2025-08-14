@@ -829,20 +829,21 @@ function render(data){
   const feePolicies = data.feePolicies || {};
   const buildingPolicies = data.buildingPolicies || {};
 
-  const salesHtml = [
-    renderRowIf('Application Fee (Sale)', dollar(val(fees.sales||{}, 'Sale building application fee'))),
-    renderRowIf('Move-in Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move in fee'))),
-    renderRowIf('Move-out Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move out fee'))),
-    renderRowIf('Security Deposit (Sale)', dollar(val(fees.sales||{}, 'Sale move in deposit'))),
-    renderRowIf('Board Package Fee (Sale)', dollar(val(fees.sales||{}, 'Sale move out deposit'))),
-  ].join('');
+    const salesHtml = [
+      renderRowIf('Application Fee', dollar(val(fees.sales||{}, 'Sale building application fee'))),
+      renderRowIf('Move-in Fee', dollar(val(fees.sales||{}, 'Sale move in fee'))),
+      renderRowIf('Move-out Fee', dollar(val(fees.sales||{}, 'Sale move out fee'))),
+      renderRowIf('Move-in Deposit', dollar(val(fees.sales||{}, 'Sale move in deposit'))),
+      renderRowIf('Move-out Deposit', dollar(val(fees.sales||{}, 'Sale move out deposit'))),
+    ].join('');
 
-  const leaseHtml = [
-    renderRowIf('Application Fee (Sublet)', dollar(val(fees.leases||{}, 'Lease building application fee'))),
-    renderRowIf('Move-in Fee (Sublet)', dollar(val(fees.leases||{}, 'Lease move in fee'))),
-    renderRowIf('Move-out Fee (Sublet)', dollar(val(fees.leases||{}, 'Lease move out fee'))),
-    renderRowIf('Security Deposit (Sublet)', dollar(val(fees.leases||{}, 'Lease move in deposit'))),
-  ].join('');
+    const leaseHtml = [
+      renderRowIf('Application Fee', dollar(val(fees.leases||{}, 'Lease building application fee'))),
+      renderRowIf('Move-in Fee', dollar(val(fees.leases||{}, 'Lease move in fee'))),
+      renderRowIf('Move-out Fee', dollar(val(fees.leases||{}, 'Lease move out fee'))),
+      renderRowIf('Move-in Deposit', dollar(val(fees.leases||{}, 'Lease move in deposit'))),
+      renderRowIf('Move-out Deposit', dollar(val(fees.leases||{}, 'Lease move out deposit'))),
+    ].join('');
 
   const altPct = val(fees.alterations||{}, 'Alteration sec deposit (%)');
   const altHtml = meaningful(altPct) ? renderRow('Alteration Security Deposit (%)', `${altPct}%`) : '';
