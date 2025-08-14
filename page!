@@ -436,24 +436,24 @@
 
   /* Detailed card follows same styling as basic; only spacing needed */
   .detailed-card { margin-top: 32px; }
-  .purchase-cta--detail{ margin-top:16px; display:flex; justify-content:center; }
+  .purchase-cta--detail{ margin-top:16px; display:flex; justify-content:center; align-items:center; }
   .purchase-cta-btn--sm{ 
-    max-width:260px; 
-    width:auto; 
+    max-width:none;
+    width: fit-content; 
     background:#85FF5B; 
     border-color:#6ee75a; 
     color:#1A1A1A; 
     font-weight:400; 
     font-family:"Basis Grotesque", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     font-size:14px;
-    padding:10px 14px; 
+    padding:10px 16px; 
     border-radius:9999px; 
     display:inline-flex; 
     align-items:center; 
     justify-content:center; 
-    gap:8px; 
+    gap:0; 
   }
-  .purchase-cta-btn--sm:hover{ filter:brightness(.95); }
+  .purchase-cta-btn--sm:hover{ filter:brightness(.95); gap:8px; }
   .purchase-cta-btn--sm .btn-price{ opacity:0; width:0; margin-left:0; overflow:hidden; white-space:nowrap; transition:opacity .15s ease, width .15s ease, margin .15s ease; }
   .purchase-cta-btn--sm:hover .btn-price{ opacity:0.95; width:auto; margin-left:4px; }
   .purchase-cta-btn--sm .btn-arrow{ opacity:0; width:0; height:18px; margin-left:0; overflow:hidden; transition:opacity .15s ease, width .15s ease, margin .15s ease; display:inline-flex; align-items:center; }
@@ -828,6 +828,7 @@ function render(data){
   const fees = data.fees || {};
   const feePolicies = data.feePolicies || {};
   const buildingPolicies = data.buildingPolicies || {};
+  const paidFlag = !!(data['PAID?'] || data['PAID? '] || data.paid || data.PAID);
 
     const salesHtml = [
       renderRowIf('Application Fee', dollar(val(fees.sales||{}, 'Sale building application fee'))),
@@ -896,6 +897,57 @@ function render(data){
   Array.from(keySet).forEach(k => { if (!visited.has(k)) renderOne(k, buildingPolicies[k]); });
 
   buildingPoliciesEl.innerHTML = rows.join('') || renderRow('Policies','No policy data');
+
+  // Populate paid-only fields when available and paid is true
+  try {
+    if (paidFlag) {
+      const paid = data.PAIDFORUNITINFO || data.paidForUnitInfo || {};
+      const unitInfoEl = byId('unit-specific-info-section');
+      const bldgInfoEl = byId('building-info-section');
+      // Helper: unique paid rows (avoid duplicates across re-renders)
+      const renderPaidRow = (label, valueHtml) => {
+        const html = renderRow(label, valueHtml).replace('data-row"', 'data-row paid-insert"');
+        return html;
+      };
+      // Clear any previously injected paid rows on re-render
+      document.querySelectorAll('.paid-insert').forEach(n=> n.parentNode && n.parentNode.removeChild(n));
+      if (unitInfoEl) {
+        const monthlyTxt = paid['Monthly common charges'];
+        if (meaningful(monthlyTxt)) {
+          // Parse lines like: "Recurring monthly charges as of 2025-08-01:\nLocal Law 97 & Roof Capital Assessment:  $726\nMonthly Common Charges:  $1212.56"
+          const lines = String(monthlyTxt).split(/\n+/).map(s=>s.trim()).filter(Boolean);
+          // Extract entries after the first line (date info)
+          const entries = [];
+          let asOf = '';
+          if (/recurring\s+monthly\s+charges\s+as\s+of/i.test(lines[0]||'')) {
+            asOf = lines[0].replace(/.*as\s+of\s+/i,'').replace(/:$/,'').trim();
+          }
+          for (let i=1;i<lines.length;i++){
+            const m = lines[i].match(/^([^:]+):\s*\$?\s*([0-9.,]+)/i);
+            if (m){ entries.push({ label: m[1].trim(), amount: `$${m[2]}` }); }
+          }
+          // Preferentially render Monthly Common Charges and Local Law 97 first, then others
+          const pickup = (key)=> entries.find(e=> e.label.toLowerCase().includes(key));
+          const mcc = pickup('monthly common charges');
+          const ll97 = entries.find(e=> /local\s*law\s*97|roof\s*capital/i.test(e.label.toLowerCase()));
+          const others = entries.filter(e=> e!==mcc && e!==ll97);
+          if (mcc) unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Monthly Common Charges', mcc.amount));
+          if (ll97) unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow('Local Law 97 & Roof Capital Assessment', ll97.amount));
+          // Any additional recurring charges
+          others.reverse().forEach(e=>{
+            unitInfoEl.insertAdjacentHTML('afterbegin', renderPaidRow(e.label, e.amount));
+          });
+        }
+      }
+      if (bldgInfoEl) {
+        const breakdown = paid['Unit breakdown'];
+        if (meaningful(breakdown)) {
+          const rowHtml = renderPaidRow('Unit breakdown', renderClamped(breakdown));
+          bldgInfoEl.insertAdjacentHTML('afterbegin', rowHtml);
+        }
+      }
+    }
+  } catch {}
 
   requestAnimationFrame(()=>{
     document.querySelectorAll('.clamp-wrap').forEach(wrap=>{
