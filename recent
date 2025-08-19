@@ -1,5 +1,22 @@
 <!-- Softr HTML Block (3-line clamp + clean links + utilities pills + preferred order) -->
 <div class="container">
+  <!-- Loading Overlay -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading building information...</div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div id="error-message" class="error-message" style="display: none;">
+    <div class="error-content">
+      <span class="error-icon">⚠️</span>
+      <div class="error-text"></div>
+      <button class="error-retry-btn" onclick="window.refreshData()">Try Again</button>
+    </div>
+  </div>
+
   <div class="outer-card">
     <div class="page-title">Basic building information</div>
     <div class="subtitle">Essential building information including fees, policies, and application documents.</div>
@@ -616,6 +633,100 @@
       margin:4px 0 !important; 
     }
   }
+
+  /* Loading Overlay */
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
+  }
+
+  .loading-content {
+    text-align: center;
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+  }
+
+  .loading-spinner {
+    width: 48px;
+    height: 48px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid var(--daisy-green);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 18px;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* Error Message */
+  .error-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ef4444;
+    z-index: 9999;
+    max-width: 400px;
+    text-align: center;
+  }
+
+  .error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .error-icon {
+    font-size: 32px;
+  }
+
+  .error-text {
+    font-size: 16px;
+    color: var(--fg);
+    line-height: 1.5;
+  }
+
+  .error-retry-btn {
+    background: var(--daisy-green);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .error-retry-btn:hover {
+    background: var(--daisy-deep);
+  }
 </style>
 
 <script>
@@ -633,6 +744,10 @@ function init(){
   const root = document.querySelector('.outer-card');
   if(!root){ requestAnimationFrame(init); return; }
   window.__blkReady = true;
+
+  // Hide loading state initially (will be shown again when fetchData is called)
+  hideLoadingState();
+  hideErrorState();
 
   document.querySelectorAll('.section-head').forEach(btn=>{
     btn.addEventListener('click', ()=>{
@@ -731,8 +846,29 @@ function init(){
   attachTxn('btn-custom');
 
   fetchData().catch(console.error);
-  window.addEventListener('pageshow', () => { fetchData().catch(console.error); });
-  window.addEventListener('popstate', () => { fetchData().catch(console.error); });
+  
+  // Only refresh data on actual navigation changes, not just page refreshes
+  let lastUrl = window.location.href;
+  window.addEventListener('popstate', () => { 
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastUrl) {
+      console.log('🔄 URL changed, refreshing data');
+      lastUrl = currentUrl;
+      fetchData().catch(console.error);
+    }
+  });
+  
+  // Check for URL changes on pageshow (but be smart about it)
+  window.addEventListener('pageshow', (event) => {
+    const currentUrl = window.location.href;
+    if (currentUrl !== lastUrl) {
+      console.log('🔄 URL changed on pageshow, refreshing data');
+      lastUrl = currentUrl;
+      fetchData().catch(console.error);
+    } else {
+      console.log('📋 Same URL on pageshow, using cached data');
+    }
+  });
 }
 
 async function fetchData(){
@@ -741,6 +877,7 @@ async function fetchData(){
   if(!buildingId) return;
 
   // UPDATED: only auto-generate transactionId when it's missing AND we are NOT in the (recordId + buildingId) path
+  let finalTransactionId = qs.get('transactionId');
   try {
     const url = new URL(window.location.href);
     const hasTxn = !!url.searchParams.get('transactionId');
@@ -750,30 +887,211 @@ async function fetchData(){
       const generated = `${Date.now()}-${Math.random().toString(36).slice(2,10)}`;
       url.searchParams.set('transactionId', generated);
       window.history.replaceState({}, '', url.toString());
+      // Update our local variable to match the new URL
+      finalTransactionId = generated;
     }
   } catch {}
 
-  // Always re-fetch on load; do not rely on cache
-  let data;
+  // Show loading state immediately
+  showLoadingState();
+  
+  // SMART CACHING: Hybrid approach - basic info cached, detailed info requires webhook check
+  const cacheKey = `${buildingId}-${qs.get('recordId') || 'no-record'}-${finalTransactionId || 'no-txn'}`;
+  
+  // Also create a fallback key for when transactionId is missing but we have building/record
+  const fallbackCacheKey = finalTransactionId === 'no-txn' ? 
+    `${buildingId}-${qs.get('recordId') || 'no-record'}-*` : null;
+  
+  // Load cached data from localStorage
+  let cachedData;
+  let needsWebhookForDetailed = false;
+  
   try {
-    data = await webhook(buildingId, qs.get('transactionId'), qs.get('recordId'));
-    
-    // If webhook returned null due to cooldown, use cached data or fallback
-    if (data === null) {
-      console.log('📋 Webhook skipped due to cooldown, using existing data or fallback');
-      data = window.__cachedData || getFallbackData(buildingId);
+    const storedCache = localStorage.getItem('buildingDataCache');
+    console.log('🔍 Cache lookup for key:', cacheKey);
+    if (storedCache) {
+      const parsedCache = JSON.parse(storedCache);
+      cachedData = parsedCache[cacheKey];
+      console.log('📦 Stored cache keys:', Object.keys(parsedCache));
+      console.log('📦 Raw stored cache:', storedCache.substring(0, 200) + '...');
+      
+      if (cachedData) {
+        console.log('✅ Cache hit! Found data for:', cacheKey);
+        console.log('📊 Cached data keys:', Object.keys(cachedData));
+      } else {
+        console.log('❌ Cache miss! No data for:', cacheKey);
+        // Check if there are similar keys for basic building info
+        const similarKeys = Object.keys(parsedCache).filter(key => 
+          key.includes(buildingId) && key.includes(qs.get('recordId') || 'no-record')
+        );
+        
+        if (similarKeys.length > 0) {
+          console.log('🔍 Similar keys found for basic info:', similarKeys);
+          // Use the most recent cached data for basic building info
+          const mostRecentKey = similarKeys.sort().pop();
+          const basicCachedData = parsedCache[mostRecentKey];
+          
+          // Extract only basic building info (fees, policies, etc.)
+          cachedData = {
+            fees: basicCachedData.fees,
+            feePolicies: basicCachedData.feePolicies,
+            buildingPolicies: basicCachedData.buildingPolicies,
+            // Don't include detailed unit info from old cache
+            // This will force a webhook call to check if new transactionId is paid
+          };
+          
+          console.log('🔄 Using cached basic building info from:', mostRecentKey);
+          console.log('⚠️ Will call webhook to check if new transactionId is paid for detailed info');
+          
+          // Mark that we need webhook for detailed info
+          needsWebhookForDetailed = true;
+          
+          // Update the current URL to match the cached key's transactionId for basic info
+          try {
+            const url = new URL(window.location.href);
+            const keyParts = mostRecentKey.split('-');
+            if (keyParts.length >= 3) {
+              const cachedTransactionId = keyParts.slice(2).join('-');
+              if (cachedTransactionId && cachedTransactionId !== 'no-txn') {
+                // Store the cached transactionId for basic info
+                const basicInfoTransactionId = cachedTransactionId;
+                console.log('🔄 Basic info will use cached transactionId:', basicInfoTransactionId);
+              }
+            }
+          } catch (urlError) {
+            console.warn('Failed to process cached transactionId:', urlError);
+          }
+        }
+      }
     } else {
-      // Cache successful response
-      window.__cachedData = data;
+      console.log('📦 No stored cache found in localStorage');
     }
   } catch (error) {
-    console.warn('Webhook failed, using fallback data:', error.message);
-    if (error.message.includes('429') || error.message.includes('Too Many Requests')) showRateLimitMessage();
-    data = getFallbackData(buildingId);
+    console.warn('Failed to load cache from localStorage:', error);
+  }
+  
+  let data;
+  if (cachedData && !needsWebhookForDetailed) {
+    console.log('📋 Using fully cached data for:', cacheKey);
+    data = cachedData;
+    hideLoadingState();
+  } else {
+    // We need webhook data - either no cache or need to check if new transactionId is paid
+    if (needsWebhookForDetailed) {
+      console.log('🔄 Need webhook to check if new transactionId is paid for detailed info');
+    }
+    
+    // Check if we're still rate limited before attempting webhook
+    if (circuitBreakerOpen) {
+      const timeSinceOpen = Date.now() - circuitBreakerOpenedAt;
+      if (timeSinceOpen < CIRCUIT_BREAKER_TIMEOUT) {
+        console.log('🚫 Circuit breaker still open, showing error state');
+        showErrorState('Rate limited. Please try again later.');
+        return;
+      } else {
+        console.log('🔄 Circuit breaker timeout expired, attempting webhook');
+        circuitBreakerOpen = false;
+        consecutiveFailures = 0;
+      }
+    }
+    
+    console.log('🔄 Calling webhook for:', cacheKey);
+    try {
+      data = await webhook(buildingId, finalTransactionId, qs.get('recordId'));
+      
+      if (data) {
+        // If we have cached basic info, merge it with new webhook data
+        if (needsWebhookForDetailed && cachedData) {
+          console.log('🔄 Merging cached basic info with new webhook data');
+          data = {
+            ...cachedData,  // Keep cached basic info
+            ...data          // Override/add detailed info from webhook
+          };
+        }
+        
+        // Cache successful response in localStorage
+        try {
+          const existingCache = localStorage.getItem('buildingDataCache');
+          const cache = existingCache ? JSON.parse(existingCache) : {};
+          cache[cacheKey] = data;
+          localStorage.setItem('buildingDataCache', JSON.stringify(cache));
+          console.log('💾 Cached merged data in localStorage for:', cacheKey);
+          console.log('📊 Total cached entries:', Object.keys(cache).length);
+        } catch (cacheError) {
+          console.warn('Failed to cache data:', cacheError);
+        }
+      } else {
+        console.log('📋 Webhook returned no data');
+        if (needsWebhookForDetailed && cachedData) {
+          console.log('🔄 Webhook failed but have cached basic info, showing basic info only');
+          data = cachedData;
+        } else {
+          showErrorState('No data available. Please try again later.');
+          return;
+        }
+      }
+    } catch (error) {
+      console.warn('Webhook failed:', error.message);
+      if (needsWebhookForDetailed && cachedData) {
+        console.log('🔄 Webhook failed but have cached basic info, showing basic info only');
+        data = cachedData;
+      } else {
+        if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
+          showErrorState('Rate limited. Please try again later.');
+        } else {
+          showErrorState('Failed to load data. Please try again later.');
+        }
+        return;
+      }
+    }
   }
   
   const normalized = Array.isArray(data) ? (data[0] || {}) : data;
+  hideLoadingState();
+  
+  // Log what data we're rendering
+  if (needsWebhookForDetailed && cachedData) {
+    console.log('🎯 Rendering HYBRID data:');
+    console.log('   - Basic info: From cache (fees, policies, etc.)');
+    console.log('   - Detailed info: From webhook (unit data, if paid)');
+  } else if (cachedData) {
+    console.log('🎯 Rendering FULLY CACHED data');
+  } else {
+    console.log('🎯 Rendering FRESH webhook data');
+  }
+  
   render(normalized);
+}
+
+// Loading state management
+function showLoadingState() {
+  const loadingEl = document.getElementById('loading-overlay');
+  if (loadingEl) {
+    loadingEl.style.display = 'flex';
+  }
+}
+
+function hideLoadingState() {
+  const loadingEl = document.getElementById('loading-overlay');
+  if (loadingEl) {
+    loadingEl.style.display = 'none';
+  }
+}
+
+function showErrorState(message) {
+  hideLoadingState();
+  const errorEl = document.getElementById('error-message');
+  if (errorEl) {
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+  }
+}
+
+function hideErrorState() {
+  const errorEl = document.getElementById('error-message');
+  if (errorEl) {
+    errorEl.style.display = 'none';
+  }
 }
 
 function showRateLimitMessage() {
@@ -783,7 +1101,7 @@ function showRateLimitMessage() {
     <div class="message-content">
       <span>⚠️</span> 
       <strong>Rate Limited:</strong> The data service is temporarily busy. 
-      Showing sample data. Please try again in a few minutes.
+      Please try again in a few minutes.
     </div>`;
   const titleEl = document.querySelector('.page-title');
   if (titleEl && titleEl.parentNode) titleEl.parentNode.insertBefore(messageEl, titleEl.nextSibling);
@@ -1006,6 +1324,142 @@ window.resetWebhookFailures = () => {
   circuitBreakerOpen = false;
   circuitBreakerOpenedAt = 0;
   console.log('🔄 Webhook failure state and circuit breaker manually reset');
+};
+
+// Manual refresh function for when users need fresh data
+window.refreshData = () => {
+  console.log('🔄 Manual refresh requested');
+  const currentUrl = window.location.href;
+  lastUrl = ''; // Force refresh by clearing last URL
+  
+  // Clear the cache for this specific combination to force fresh data
+  const qs = new URLSearchParams(window.location.search);
+  const buildingId = qs.get('buildingId');
+  const recordId = qs.get('recordId');
+  const transactionId = qs.get('transactionId');
+  const cacheKey = `${buildingId}-${recordId || 'no-record'}-${transactionId || 'no-txn'}`;
+  
+  try {
+    const existingCache = localStorage.getItem('buildingDataCache');
+    if (existingCache) {
+      const cache = JSON.parse(existingCache);
+      delete cache[cacheKey];
+      localStorage.setItem('buildingDataCache', JSON.stringify(cache));
+      console.log('🗑️ Cleared cache for:', cacheKey);
+    }
+  } catch (error) {
+    console.warn('Failed to clear cache:', error);
+  }
+  
+  fetchData().catch(console.error);
+};
+
+// Function to clear all cached data
+window.clearAllCache = () => {
+  try {
+    localStorage.removeItem('buildingDataCache');
+    console.log('🗑️ All cached data cleared');
+  } catch (error) {
+    console.warn('Failed to clear cache:', error);
+  }
+};
+
+// Function to show current cache status
+window.showCacheStatus = () => {
+  try {
+    const storedCache = localStorage.getItem('buildingDataCache');
+    if (storedCache) {
+      const cache = JSON.parse(storedCache);
+      const keys = Object.keys(cache);
+      console.log('📊 Cache Status:');
+      console.log('   Total entries:', keys.length);
+      console.log('   Cache keys:', keys);
+      
+      // Show current page's cache key
+      const qs = new URLSearchParams(window.location.search);
+      const buildingId = qs.get('buildingId');
+      const recordId = qs.get('recordId');
+      const transactionId = qs.get('transactionId');
+      const currentKey = `${buildingId}-${recordId || 'no-record'}-${transactionId || 'no-txn'}`;
+      console.log('   Current page key:', currentKey);
+      console.log('   Has current data:', !!cache[currentKey]);
+      
+      // Show similar keys for current building/record
+      if (buildingId && recordId) {
+        const similarKeys = keys.filter(key => 
+          key.includes(buildingId) && key.includes(recordId)
+        );
+        console.log('   Similar keys for current building/record:', similarKeys);
+        if (similarKeys.length > 0) {
+          console.log('   Most recent similar key:', similarKeys.sort().pop());
+          
+          // Show what data is available in the most recent similar key
+          const mostRecentKey = similarKeys.sort().pop();
+          const mostRecentData = cache[mostRecentKey];
+          console.log('   Data available in most recent key:');
+          console.log('     - Basic info (fees, policies):', !!(mostRecentData.fees || mostRecentData.feePolicies || mostRecentData.buildingPolicies));
+          console.log('     - Detailed info (unit data):', !!(mostRecentData.PAIDFORUNITINFO || mostRecentData.unitInfo));
+        }
+      }
+    } else {
+      console.log('📊 Cache Status: No cached data found');
+    }
+  } catch (error) {
+    console.warn('Failed to show cache status:', error);
+  }
+};
+
+// Function to find and use cached data for current building/record
+window.findCachedData = () => {
+  try {
+    const qs = new URLSearchParams(window.location.search);
+    const buildingId = qs.get('buildingId');
+    const recordId = qs.get('recordId');
+    
+    if (!buildingId || !recordId) {
+      console.log('❌ Need both buildingId and recordId to search cache');
+      return;
+    }
+    
+    const storedCache = localStorage.getItem('buildingDataCache');
+    if (storedCache) {
+      const cache = JSON.parse(storedCache);
+      const similarKeys = Object.keys(cache).filter(key => 
+        key.includes(buildingId) && key.includes(recordId)
+      );
+      
+      if (similarKeys.length > 0) {
+        const mostRecentKey = similarKeys.sort().pop();
+        const cachedData = cache[mostRecentKey];
+        console.log('🔍 Found cached data for:', mostRecentKey);
+        console.log('📊 Data keys:', Object.keys(cachedData));
+        
+        // Update URL with the cached transactionId
+        const keyParts = mostRecentKey.split('-');
+        if (keyParts.length >= 3) {
+          const cachedTransactionId = keyParts.slice(2).join('-');
+          if (cachedTransactionId && cachedTransactionId !== 'no-txn') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('transactionId', cachedTransactionId);
+            window.history.replaceState({}, '', url.toString());
+            console.log('🔄 Updated URL with cached transactionId:', cachedTransactionId);
+            
+            // Render the cached data
+            const normalized = Array.isArray(cachedData) ? (cachedData[0] || {}) : cachedData;
+            hideLoadingState();
+            render(normalized);
+            return;
+          }
+        }
+      } else {
+        console.log('❌ No cached data found for current building/record');
+      }
+    } else {
+      console.log('❌ No cache found in localStorage');
+    }
+  } catch (error) {
+    console.warn('Failed to find cached data:', error);
+  }
 };
 
 /* ---------- config ---------- */
