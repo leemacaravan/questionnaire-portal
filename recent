@@ -2,7 +2,7 @@
 <div class="container">
   <div class="outer-card">
     <div class="page-title">Basic building information</div>
-    <div class="subtitle">Essential building information available at no charge. This includes fees, policies, and application documents.</div>
+    <div class="subtitle">Essential building information including fees, policies, and application documents.</div>
 
     <!-- Print icon in top right of Basic building information card -->
     <button class="print-icon" onclick="window.print()" aria-label="Print">
@@ -170,12 +170,12 @@
       <div class="offer">
         <div class="offer-title">Need more details?</div>
         <div class="offer-desc">Get unit-specific information and detailed building data with our standard questionnaire.</div>
-        <a class="btn btn-blue" id="btn-standard" href="#" role="button">Get standard questionnaire — $150</a>
+        <a class="btn btn-blue" id="btn-standard" href="#" role="button">Get standard questionnaire<span class="btn-price"> — $150</span><span class="btn-arrow">→</span></a>
       </div>
       <div class="offer">
         <div class="offer-title">Need something custom?</div>
         <div class="offer-desc">Get personalized responses in your preferred format with expert follow-ups.</div>
-        <a class="btn btn-indigo" id="btn-custom" href="#" role="button">Get custom questionnaire — $450</a>
+        <a class="btn btn-indigo" id="btn-custom" href="#" role="button">Get custom questionnaire<span class="btn-price"> — $450</span><span class="btn-arrow">→</span></a>
       </div>
     </div>
   </div>
@@ -184,21 +184,6 @@
   <div class="outer-card detailed-card" id="detailed-card" hidden>
     <div class="page-title">Detailed unit and building information</div>
     <div class="subtitle">Unlock comprehensive unit-specific and building data to speed up your application</div>
-    <div class="paid-badge" aria-label="Paid access - $150" title="Paid access - $150">
-      <span class="paid-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g clip-path="url(#clip0_paid_11296)">
-            <path d="M17 16H19V4H9V6H17V16ZM17 18V21C17 21.552 16.55 22 15.993 22H4.007C3.87513 22.0008 3.7444 21.9755 3.62232 21.9256C3.50025 21.8757 3.38923 21.8022 3.29566 21.7093C3.20208 21.6164 3.12779 21.5059 3.07705 21.3841C3.02632 21.2624 3.00013 21.1319 3 21L3.003 7C3.003 6.448 3.453 6 4.01 6H7V3C7 2.73478 7.10536 2.48043 7.29289 2.29289C7.48043 2.10536 7.73478 2 8 2H20C20.2652 2 20.5196 2.10536 20.7071 2.29289C20.8946 2.48043 21 2.73478 21 3V17C21 17.2652 20.8946 17.5196 20.7071 17.7071C20.5196 17.8946 20.2652 18 20 18H17ZM5.003 8L5 20H15V8H5.003ZM7 16H11.5C11.6326 16 11.7598 15.9473 11.8536 15.8536C11.9473 15.7598 12 15.6326 12 15.5C12 15.3674 11.9473 15.2402 11.8536 15.1464C11.7598 15.0527 11.6326 15 11.5 15H8.5C7.83696 15 7.20107 14.7366 6.73223 14.2678C6.26339 13.7989 6 13.163 6 12.5C6 11.837 6.26339 11.2011 6.73223 10.7322C7.20107 10.2634 7.83696 10 8.5 10H9V9H11V10H13V12H8.5C8.36739 12 8.24021 12.0527 8.14645 12.1464C8.05268 12.2402 8 12.3674 8 12.5C8 12.6326 8.05268 12.7598 8.14645 12.8536C8.24021 12.9473 8.36739 13 8.5 13H11.5C12.163 13 12.7989 13.2634 13.2678 13.7322C13.7366 14.2011 14 14.837 14 15.5C14 16.163 13.7366 16.7989 13.2678 17.2678C12.7989 17.7366 12.163 18 11.5 18H11V19H9V18H7V16Z" fill="currentColor"/>
-          </g>
-          <defs>
-            <clipPath id="clip0_paid_11296">
-              <rect width="24" height="24" fill="white"/>
-            </clipPath>
-          </defs>
-        </svg>
-      </span>
-      <span class="paid-text">$150</span>
-    </div>
 
     <!-- Section: Unit Specific Information -->
     <div class="section">
@@ -457,6 +442,11 @@
   a.file-link{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:6px; background:#EEF4FF; border:1px solid #C7D2FE; color:#2563EB; text-decoration:none; font-weight:400; font-size:12px; line-height:1; }
   a.file-link:hover{ background:#E6EEFF; border-color:#B7C8FF; color:#1D4ED8; text-decoration:underline; }
   a.file-link svg{ width:16px; height:16px; display:block; }
+  
+  /* Portal link style - no box, no underline, smaller than file links */
+  a.portal-link{ display:inline-flex; align-items:center; gap:6px; color:#2563EB; text-decoration:none; font-weight:400; font-size:12px; }
+  a.portal-link:hover{ text-decoration:none; }
+  a.portal-link svg{ width:16px; height:16px; display:block; }
 
   /* NEW: Upsell offers */
   .upsell-card{ margin-top:24px; }
@@ -468,7 +458,27 @@
   .btn{ display:inline-block; padding:10px 14px; border-radius:4px; font-weight:700; text-decoration:none; color:#fff; border:1px solid transparent; }
   .btn-blue{ background:var(--daisy-blue); }
   .btn-indigo{ background:var(--daisy-midnight); }
-  .btn:hover{ filter:brightness(.92); }
+  .btn:hover{ filter:brightness(.92); color:#fff; }
+  
+  /* Center buttons and add hover effects like purchase button */
+  .offer .btn{ 
+    display:inline-flex; 
+    align-items:center; 
+    justify-content:center; 
+    margin:0 auto; 
+    width:fit-content; 
+    min-width:200px;
+    border-radius:4px;
+    transition: filter .15s ease;
+  }
+  
+  /* Hide prices by default, show on hover (same as purchase button) */
+  .btn .btn-price{ opacity:0; width:0; margin-left:0; overflow:hidden; white-space:nowrap; transition:opacity .15s ease, width .15s ease, margin .15s ease; }
+  .btn:hover .btn-price{ opacity:1; width:auto; margin-left:4px; }
+  
+  /* Hide arrows by default, show on hover (same as purchase button) */
+  .btn .btn-arrow{ opacity:0; width:0; margin-left:0; overflow:hidden; white-space:nowrap; transition:opacity .15s ease, width .15s ease, margin .15s ease; }
+  .btn:hover .btn-arrow{ opacity:1; width:auto; margin-left:4px; }
 
   /* Special styling for utilities and HVAC containers */
   .data-row.utility-hvac-row { background:var(--daisy-mint); border:1px solid var(--daisy-grass); border-radius:4px; }
@@ -517,7 +527,7 @@
     font-family:"Basis Grotesque", Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     font-size:14px;
     padding:10px 16px; 
-    border-radius:9999px; 
+    border-radius:4px; 
     display:inline-flex; 
     align-items:center; 
     justify-content:center; 
@@ -565,12 +575,13 @@
     width: 24px;
     height: 24px;
     display: block;
+    fill: #E5E7EB;
   }
 
   /* Print */
   @media print {
     .print-controls,.section-head,.toggle{ display:none !important; }
-    .application-docs{ display:none !important; }
+    .application-docs{ display:block !important; }
     .section-body{ display:block !important; }
     .toggle,button.toggle,.clamp-wrap .toggle,[class*="toggle"]{ display:none !important; visibility:hidden !important; opacity:0 !important; position:absolute !important; left:-9999px !important; }
     .clamp-wrap[data-expanded="false"] .clamp-text,.clamp-wrap .clamp-text{ display:block !important; -webkit-line-clamp:unset !important; max-height:none !important; overflow:visible !important; height:auto !important; -webkit-box-orient:unset !important; }
@@ -584,36 +595,26 @@
     .data-row{ border:1px solid #ddd !important; background:#fff !important; page-break-inside:avoid; }
     .section:not(:last-child){ page-break-after:auto; }
     .page-title,.subtitle,.section-head{ page-break-after:avoid; }
-     
-  /* Typography */
-  .page-title {
-    font-family: 'Reckless', serif;
-    font-weight: 600;
-    font-size: 32px;
-    line-height: 1.2;
-    color: var(--fg);
-    margin: 0 0 8px 0;
-  }
-
-  .subtitle {
-    font-family: 'Basis Grotesk', sans-serif;
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 1.5;
-    color: var(--fg-secondary);
-    margin: 0 0 24px 0;
-  }
-
-  .section-head h3 {
-    font-family: 'Reckless', serif;
-    font-weight: 600;
-    font-size: 20px;
-    line-height: 1.3;
-    color: var(--fg);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    
+    /* Hide questionnaire offer cards in print */
+    .upsell-card{ display:none !important; }
+    
+    /* Ensure all links are clickable and visible in print, but hide all icons */
+    a.file-link, a.portal-link, a[href]{ 
+      color:#000 !important; 
+      text-decoration:underline !important; 
+      background:transparent !important; 
+      border:none !important; 
+      padding:0 !important; 
+      display:inline !important; 
+    }
+    a.file-link svg, a.portal-link svg, svg{ 
+      display:none !important; 
+    }
+    .stack-links{ 
+      display:block !important; 
+      margin:4px 0 !important; 
+    }
   }
 </style>
 
@@ -925,7 +926,7 @@ async function webhook(buildingId, transactionId, recordId){
         },
         body:JSON.stringify(payload)
       });
-      const raw = await res.text();
+    const raw = await res.text();
       return { res, raw };
     };
     
@@ -940,7 +941,7 @@ async function webhook(buildingId, transactionId, recordId){
         console.log(`🔄 Attempt ${i+1}: Calling webhook...`);
         const { res, raw } = await attempt();
         
-        if (res.status === 429) {
+    if (res.status === 429) {
           console.log(`🚫 Rate limited (429), attempt ${i+1} failed`);
           consecutiveFailures++;
           
@@ -974,13 +975,13 @@ async function webhook(buildingId, transactionId, recordId){
         }
         catch(e){ 
           console.error('❌ Failed to parse webhook response:', e, raw.slice(0,400)); 
-          throw new Error(`Webhook returned non-JSON response: ${e.message}`); 
-        }
-      } catch (error) {
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error(`Webhook returned non-JSON response: ${e.message}`);
+    }
+  } catch (error) {
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
           console.log(`🌐 Network error on attempt ${i+1}:`, error.message);
-          throw new Error('Network error: Unable to reach the webhook service');
-        }
+      throw new Error('Network error: Unable to reach the webhook service');
+    }
         if (i === delays.length - 1) throw error;
       }
     }
@@ -1038,13 +1039,21 @@ const renderRowIf = (label, raw)=>{ if(!meaningful(raw)) return ''; const text =
 const SPLIT_REGEX = new RegExp('[,;/|•&]+','g');
 const splitTokens = (s)=> String(s).replace(/\band\b/gi, ',').split(SPLIT_REGEX).map(t=>t.trim()).filter(Boolean);
 const toChipItems = (v) => {
-  if (Array.isArray(v)){ return v.flatMap(x => { if (x == null) return []; if (typeof x === 'string') return splitTokens(x); if (typeof x === 'object' && 'name' in x) return [String(x.name).trim()]; return [String(x).trim()]; }); }
-  if (v && typeof v === 'object'){ const guess = v.value || v.text || v.name || v.label; if (guess) return splitTokens(guess); }
-  if (typeof v === 'string'){ const s = v.trim().replace(/^\[(.*)\]$/,'$1'); try { if (s.startsWith('[') && s.endsWith(']')) return JSON.parse(s).map(x=>String(x).trim()).filter(Boolean); } catch{} return splitTokens(s); }
+  // Helper function to format amenity names (remove underscores, fix capitalization)
+  const formatAmenityName = (name) => {
+    return String(name)
+      .replace(/_/g, ' ')  // Replace underscores with spaces
+      .toLowerCase()       // Convert to lowercase first
+      .replace(/^\w/, (letter) => letter.toUpperCase()); // Only capitalize first letter of first word
+  };
+  
+  if (Array.isArray(v)){ return v.flatMap(x => { if (x == null) return []; if (typeof x === 'string') return splitTokens(x).map(formatAmenityName); if (typeof x === 'object' && 'name' in x) return [formatAmenityName(String(x.name).trim())]; return [formatAmenityName(String(x).trim())]; }); }
+  if (v && typeof v === 'object'){ const guess = v.value || v.text || v.name || v.label; if (guess) return splitTokens(guess).map(formatAmenityName); }
+  if (typeof v === 'string'){ const s = v.trim().replace(/^\[(.*)\]$/,'$1'); try { if (s.startsWith('[') && s.endsWith(']')) return JSON.parse(s).map(x=>formatAmenityName(String(x).trim())).filter(Boolean); } catch{} return splitTokens(s).map(formatAmenityName); }
   return [];
 };
 const renderChips = (items)=> items.length ? `<div class="pills">${items.map(t=>`<span class="pill">${t}</span>`).join('')}</div>` : '';
-const isChipField = (label) => /(utilities\s*included|utilities|hvac)/i.test(String(label));
+const isChipField = (label) => /(utilities\s*included|utilities|hvac|amenities|amenity)/i.test(String(label));
 
 function extractJsonObjects(str){
   const out=[]; let depth=0, start=-1, inStr=false, esc=false;
@@ -1071,10 +1080,10 @@ function normalizeAttachments(field){
   fromEntry(field);
   return out;
 }
-  const uniqueByUrl = arr => { const s=new Set(); return arr.filter(a => (a.url && !s.has(a.url)) ? (s.add(a.url), true) : false); };
+const uniqueByUrl = arr => { const s=new Set(); return arr.filter(a => (a.url && !s.has(a.url)) ? (s.add(a.url), true) : false); };
   
   // Format numbers with commas and handle percentages
-  const formatNumber = (num, isPercentage = false) => {
+  const formatNumber = (num, isPercentage = false, isMoney = false) => {
     if (num == null || num === '') return '';
     const parsed = parseFloat(num);
     if (isNaN(parsed)) return String(num);
@@ -1083,6 +1092,11 @@ function normalizeAttachments(field){
       return parsed.toLocaleString('en-US', { 
         minimumFractionDigits: 4, 
         maximumFractionDigits: 4 
+      }) + '%';
+    } else if (isMoney) {
+      return '$' + parsed.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
       });
     }
     
@@ -1115,21 +1129,21 @@ function render(data){
     }
   } catch {}
 
-    const salesHtml = [
+  const salesHtml = [
               renderRowIf('Application fee', dollar(val(fees.sales||{}, 'Sale building application fee'))),
         renderRowIf('Move-in fee', dollar(val(fees.sales||{}, 'Sale move in fee'))),
         renderRowIf('Move-out fee', dollar(val(fees.sales||{}, 'Sale move out fee'))),
         renderRowIf('Move-in deposit', dollar(val(fees.sales||{}, 'Sale move in deposit'))),
         renderRowIf('Move-out deposit', dollar(val(fees.sales||{}, 'Sale move out deposit'))),
-    ].join('');
+  ].join('');
 
-    const leaseHtml = [
+  const leaseHtml = [
               renderRowIf('Application fee', dollar(val(fees.leases||{}, 'Lease building application fee'))),
         renderRowIf('Move-in fee', dollar(val(fees.leases||{}, 'Lease move in fee'))),
         renderRowIf('Move-out fee', dollar(val(fees.leases||{}, 'Lease move out fee'))),
         renderRowIf('Move-in deposit', dollar(val(fees.leases||{}, 'Lease move in deposit'))),
         renderRowIf('Move-out deposit', dollar(val(fees.leases||{}, 'Lease move out deposit'))),
-    ].join('');
+  ].join('');
 
   const altPct = val(fees.alterations||{}, 'Alteration sec deposit (%)');
           const altHtml = meaningful(altPct) ? renderRow('Alteration security deposit (%)', `${altPct}%`) : '';
@@ -1149,6 +1163,10 @@ function render(data){
   const preferredOrder = ['LLCs allowed','Pied a terre','Trusts allowed','Gifting allowed?','Co-purchasing allowed?','Fee simple','Right of First Refusal','Pet Policy','Sublet policy?','HVAC','Utilities included'];
   const keySet = new Set(Object.keys(buildingPolicies));
   const visited = new Set();
+
+  console.log('Building policies available:', buildingPolicies);
+  console.log('Building policies keys:', Object.keys(buildingPolicies));
+  console.log('Looking for amenities in buildingPolicies:', buildingPolicies.amenities || buildingPolicies.amenity);
 
   const subletKey = Array.from(keySet).find(k => k.toLowerCase().startsWith('sublet policy'));
 
@@ -1187,6 +1205,10 @@ function render(data){
   try {
     if (paidFlag) {
       const paid = data.PAIDFORUNITINFO || data.paidForUnitInfo || {};
+      console.log('Full data structure:', data);
+      console.log('PAIDFORUNITINFO structure:', data.PAIDFORUNITINFO);
+      console.log('paid variable:', paid);
+      
       const unitInfoEl = byId('unit-specific-info-section');
       const bldgInfoEl = byId('building-info-section');
       // Helper: unique paid rows (avoid duplicates across re-renders)
@@ -1214,7 +1236,7 @@ function render(data){
         const sqFt = paid['Unit Sq Foot'] ?? paid['Unit Sq  Foot'] ?? paid['sqFoot'] ?? paid['sqft'] ?? findVal(paid, k=>/(unit\s*sq|sq\s*ft|square)/i.test(k));
         if (meaningful(beds)) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Bedrooms', formatNumber(beds)));
         if (meaningful(baths)) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Bathrooms', formatNumber(baths)));
-        if (meaningful(sqFt)) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Square Footage', formatNumber(sqFt)));
+        if (meaningful(sqFt)) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Square Footage', formatNumber(sqFt) + ' sq ft'));
 
         // Percent ownership fields - moved from building info to unit specific info
         const percentOwnership = paid['Percent Ownership'] ?? paid['percentOwnership'] ?? findVal(paid, k=>/percent.*ownership(?!.*vot)/i.test(k));
@@ -1241,23 +1263,26 @@ function render(data){
           }
           for (let i=1;i<lines.length;i++){
             const m = lines[i].match(/^([^:]+):\s*\$?\s*([0-9.,]+)/i);
-            if (m){ entries.push({ label: m[1].trim(), amount: `$${m[2]}` }); }
+            if (m){ entries.push({ label: m[1].trim(), amount: m[2] }); }
           }
           // Preferentially render Monthly Common Charges and Local Law 97 first, then others
           const pickup = (predicate)=> entries.find(e=> predicate(e.label.toLowerCase()));
           const mcc = pickup(l=> /monthly\s*common\s*charges|common\s*charges/.test(l));
           const ll97 = entries.find(e=> /local\s*law\s*97|roof\s*capital/i.test(e.label.toLowerCase()));
           const others = entries.filter(e=> e!==mcc && e!==ll97);
-          if (mcc) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Monthly Common Charges', formatNumber(mcc.amount)));
-          if (ll97) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Local Law 97 & Roof Capital Assessment', formatNumber(ll97.amount)));
+          if (mcc) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Monthly Common Charges', formatNumber(mcc.amount, false, true)));
+          if (ll97) unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Local Law 97 & Roof Capital Assessment', formatNumber(ll97.amount, false, true)));
           // Any additional recurring charges
           others.forEach(e=>{
-            unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow(e.label, formatNumber(e.amount)));
+            unitInfoEl.insertAdjacentHTML('beforeend', renderPaidRow(e.label, formatNumber(e.amount, false, true)));
           });
         }
       }
       if (bldgInfoEl) {
         // Building-level paid fields - Legal name first, then others
+        console.log('Full paid data structure:', paid);
+        console.log('All available keys in paid data:', Object.keys(paid));
+        
         const legalName = paid['legal name'] ?? findVal(paid, k=>/legal\s*name/i.test(k));
         if (meaningful(legalName)) bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Legal name', String(legalName)));
 
@@ -1271,7 +1296,38 @@ function render(data){
         if (meaningful(floors)) bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Floors', formatNumber(floors)));
 
         const bSqFt = paid['building sq foot'] ?? paid['building sqft'] ?? findVal(paid, k=>/building.*(sq\s*ft|square)/i.test(k));
-        if (meaningful(bSqFt)) bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Building sq ft', formatNumber(bSqFt)));
+        if (meaningful(bSqFt)) bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Building sq ft', formatNumber(bSqFt) + ' sq ft'));
+
+        // Amendment numbers field
+        const amendmentNumbers = paid['amendment numbers'] ?? paid['amendment number'] ?? paid['amendment'] ?? paid['amendments'] ?? findVal(paid, k=>/amendment.*number|amendment/i.test(k));
+        console.log('Amendment numbers search:', { 
+          direct1: paid['amendment numbers'], 
+          direct2: paid['amendment number'],
+          direct3: paid['amendment'],
+          direct4: paid['amendments'],
+          found: amendmentNumbers,
+          allKeys: Object.keys(paid).filter(k => /amendment/i.test(k))
+        });
+        if (meaningful(amendmentNumbers)) bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Amendment numbers', String(amendmentNumbers)));
+
+        // Amenities field - displayed as tags similar to HVAC and utilities
+        const amenities = paid['amenities'] ?? paid['amenity'] ?? paid['building amenities'] ?? paid['building amenity'] ?? findVal(paid, k=>/amenities|amenity|facilities|features/i.test(k));
+        console.log('Amenities search:', { 
+          direct1: paid['amenities'], 
+          direct2: paid['amenity'],
+          direct3: paid['building amenities'],
+          direct4: paid['building amenity'],
+          found: amenities,
+          allKeys: Object.keys(paid).filter(k => /amenities|amenity|facilities|features/i.test(k))
+        });
+        if (meaningful(amenities)) {
+          const amenityItems = toChipItems(amenities);
+          if (amenityItems.length) {
+            bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Amenities', renderChips(amenityItems)));
+          } else {
+            bldgInfoEl.insertAdjacentHTML('beforeend', renderPaidRow('Amenities', String(amenities)));
+          }
+        }
 
         // New unit breakdown fields - displayed in 4-column grid format
         const ownerOccupying = paid['Owner occupying units'] ?? paid['Owner occupying'] ?? findVal(paid, k=>/owner.*occupying/i.test(k));
@@ -1332,9 +1388,9 @@ function render(data){
             </div>
           </div>`;
           
-          // Insert the grid first, then the header above it
-          bldgInfoEl.insertAdjacentHTML('beforeend', unitBreakdownGrid);
+          // Insert the header first, then the grid below it
           bldgInfoEl.insertAdjacentHTML('beforeend', '<h4>Unit Breakdown</h4>');
+          bldgInfoEl.insertAdjacentHTML('beforeend', unitBreakdownGrid);
         }
       }
     }
@@ -1445,8 +1501,9 @@ function render(data){
 
     const sections = [];
     const fileIcon = `\n<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g clip-path=\"url(#clip0_672_10332)\">\n<path d=\"M20 22H4C3.73478 22 3.48043 21.8946 3.29289 21.7071C3.10536 21.5196 3 21.2652 3 21V3C3 2.73478 3.10536 2.48043 3.29289 2.29289C3.48043 2.10536 3.73478 2 4 2H20C20.2652 2 20.5196 2.10536 20.7071 2.29289C20.8946 2.48043 21 2.73478 21 3V21C21 21.2652 20.8946 21.5196 20.7071 21.7071C20.5196 21.8946 20.2652 22 20 22ZM19 20V4H5V20H19ZM8 7H16V9H8V7ZM8 11H16V13H8V11ZM8 15H16V17H8V15Z\" fill=\"#2563EB\"/>\n</g>\n<defs>\n<clipPath id=\"clip0_672_10332\">\n<rect width=\"24\" height=\"24\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>`;
+    const portalIcon = `\n<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n<g clip-path=\"url(#clip0_672_14916)\">\n<path d=\"M10 3V5H5V19H19V14H21V20C21 20.2652 20.8946 20.5196 20.7071 20.7071C20.5196 20.8946 20.2652 21 20 21H4C3.73478 21 3.48043 20.8946 3.29289 20.7071C3.10536 20.5196 3 20.2652 3 20V4C3 3.73478 3.10536 3.48043 3.29289 3.29289C3.48043 3.10536 3.73478 3 4 3H10ZM17.586 5H13V3H21V11H19V6.414L12 13.414L10.586 12L17.586 5Z\" fill=\"#2563EB\"/>\n</g>\n<defs>\n<clipPath id=\"clip0_672_14916\">\n<rect width=\"24\" height=\"24\" fill=\"white\"/>\n</clipPath>\n</defs>\n</svg>`;
     const fileLink = (url,label)=> url ? `<a class=\"file-link\" href=\"${url}\" target=\"_blank\" rel=\"noopener\">${fileIcon} ${label}</a>` : '-';
-    const portalLink = (url,label)=> `<a class=\"file-link\" href=\"${url}\" target=\"_blank\" rel=\"noopener\">${fileIcon} ${label}</a>`;
+    const portalLink = (url,label)=> `<a class=\"portal-link\" href=\"${url}\" target=\"_blank\" rel=\"noopener\">${portalIcon} ${label}</a>`;
             sections.push(`<h4>Sales</h4>` + renderRow('Sales application', fileLink(salesAppUrl,'Download PDF')) + renderRow('Sales portal', portalLink(salesPortalHref,'Access online')));
         sections.push(`<h4>Alterations</h4>` + renderRow('Alteration agreement', fileLink(alterationUrl,'Download PDF')) + renderRow('Alteration platform', portalLink(alterationsPlatformHref,'Access online')));
         sections.push(`<h4>Leases</h4>` + renderRow('Daisy transfers portal', portalLink(portalWithParams,'Apply online')));
