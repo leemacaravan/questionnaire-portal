@@ -246,13 +246,6 @@
           </div>
         </div>
         
-        <!-- Loading building policies style placeholder -->
-        <div id="unit-specific-loading-policies" class="loading-placeholder" style="display: none;">
-          <div class="loading-content-inline">
-            <div class="loading-spinner-small"></div>
-            <span>Loading unit specific information...</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -299,13 +292,6 @@
           </div>
         </div>
         
-        <!-- Loading building policies style placeholder -->
-        <div id="building-info-loading-policies" class="loading-placeholder" style="display: none;">
-          <div class="loading-content-inline">
-            <div class="loading-spinner-small"></div>
-            <span>Loading building information...</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1393,7 +1379,72 @@
     .section:not(:last-child){ page-break-after:auto; }
     .page-title,.subtitle,.section-head{ page-break-after:avoid; }
     
-
+    /* Hide detailed information card when no transactionId or not paid */
+    .detailed-card:not(.has-paid-data) {
+      display: none !important;
+    }
+    
+    /* Hide detailed sections that only contain hidden/blurred data */
+    .detailed-card .section:has(.section-body:only-child .data-row:has(.hidden-pill):only-child) {
+      display: none !important;
+    }
+    
+    /* Hide individual sections that only contain hidden data */
+    .detailed-card .section:has(.section-body .data-row:has(.hidden-pill):only-child) {
+      display: none !important;
+    }
+    
+    /* Hide Unit Breakdown section if it only contains hidden data */
+    .detailed-card .section:has(h4:contains("Unit Breakdown") + .unit-breakdown-grid:has(.hidden-pill)) {
+      display: none !important;
+    }
+    
+    /* Hide Building Information section if it only contains hidden data */
+    .detailed-card .section:has(h4:contains("Building Information")):has(.section-body:only-child .data-row:has(.hidden-pill):only-child) {
+      display: none !important;
+    }
+    
+    /* Hide any remaining hidden/blurred content */
+    .hidden-pill,
+    .detailed-card .section-body:has(.hidden-pill:only-child) {
+      display: none !important;
+    }
+    
+    /* Hide all unlock and select buttons in print */
+    button:contains("Unlock"),
+    button:contains("Select"),
+    .btn:contains("Unlock"),
+    .btn:contains("Select"),
+    .button:contains("Unlock"),
+    .button:contains("Select"),
+    a:contains("Unlock"),
+    a:contains("Select"),
+    [class*="unlock"],
+    [class*="select"],
+    [id*="unlock"],
+    [id*="select"] {
+      display: none !important;
+    }
+    
+    /* Hide pricing card buttons specifically */
+    .pricing-card button,
+    .pricing-card .card-button,
+    .pricing-card input[type="button"],
+    .pricing-card input[type="submit"],
+    .pricing-card .btn,
+    .pricing-card .button,
+    .pricing-card a[href*="unlock"],
+    .pricing-card a[href*="select"],
+    .pricing-card a[href*="purchase"],
+    .pricing-card a[href*="buy"] {
+      display: none !important;
+    }
+    
+    /* Hide entire pricing cards if they only contain buttons */
+    .pricing-card:has(button:only-child),
+    .pricing-card:has(.card-button:only-child) {
+      display: none !important;
+    }
     
     /* Ensure all links are clickable and visible in print, but hide all icons */
     a.file-link, a.portal-link, a[href]{ 
@@ -2033,6 +2084,13 @@ function init(){
     
     // Hide any loading placeholders since we're showing hidden data
     hideDetailedSectionLoadingPolicies();
+    
+    // Remove has-paid-data class since we're showing hidden data
+    const detailedCard = document.getElementById('detailed-card');
+    if (detailedCard) {
+      detailedCard.classList.remove('has-paid-data');
+      console.log('⚠️ Removed has-paid-data class - showing hidden data');
+    }
   };
   
   // Check on page load
@@ -2420,6 +2478,19 @@ async function fetchData(){
   
   // Hide loading placeholders after successful render
   hideDetailedSectionLoadingPolicies();
+  
+  // Add has-paid-data class to detailed card if we have actual data (not hidden)
+  const detailedCard = document.getElementById('detailed-card');
+  if (detailedCard) {
+    const hasHiddenData = detailedCard.querySelector('.hidden-pill');
+    if (!hasHiddenData) {
+      detailedCard.classList.add('has-paid-data');
+      console.log('✅ Added has-paid-data class for print visibility');
+    } else {
+      detailedCard.classList.remove('has-paid-data');
+      console.log('⚠️ Removed has-paid-data class - only hidden data available');
+    }
+  }
 }
 
 // Loading state management
